@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["node", "jest"],
     /* Base Options */
     "target": "ES2020", // Or newer (e.g., ES2022) depending on your Node version
     "module": "NodeNext", // Use Node's native ES Module support or "CommonJS" if preferred
@@ -24,6 +25,6 @@
     "declaration": true, // Generate corresponding '.d.ts' file
     "declarationMap": true // Generate sourcemaps for declaration files
   },
-  "include": ["src/**/*", "eslint.config.js"], // Which files TypeScript should compile
+  "include": ["src/**/*", "eslint.config.js", "tests/**/*"], // Which files TypeScript should compile
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"] // Which files/folders to exclude
 }
