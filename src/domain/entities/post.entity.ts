@@ -2,37 +2,10 @@ import { randomInt } from "node:crypto"
 
 // --- Custom Error ---
 
-export class PostTitleIsRequiredError extends Error {
+export class PostDomainError extends Error {
   constructor(message: string) {
     super(message)
-  }
-}
-
-export class PostContentDomainError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = "PostContentDomainError"
-  }
-}
-
-export class PostAuthorIdIsRequiredError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = "PostAuthorIdIsRequiredError"
-  }
-}
-
-export class PostAlreadyPublishedError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = "PostAlreadyPublishedError"
-  }
-}
-
-export class PostAlreadyDraftedError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = "PostAlreadyDraftedError"
+    this.name = "PostDomainError"
   }
 }
 
@@ -108,32 +81,30 @@ export class Post {
   // --- Validation logic ---
   private static validateTitle(title: string) {
     if (!title?.trim().length) {
-      throw new PostTitleIsRequiredError("Title is required")
+      throw new PostDomainError("Title is required")
     }
     if (title.length > 255) {
-      throw new PostTitleIsRequiredError(
-        "Title must be less than 255 characters"
-      )
+      throw new PostDomainError("Title must be less than 255 characters")
     }
   }
 
   private static validateContent(content: string) {
     if (!content?.trim().length) {
-      throw new PostContentDomainError("Content is required")
+      throw new PostDomainError("Content is required")
     }
   }
 
   private static validateAuthorId(authorId: number) {
     if (!authorId) {
-      throw new PostAuthorIdIsRequiredError("Author ID is required")
+      throw new PostDomainError("Author ID is required")
     }
 
     if (authorId < 0) {
-      throw new PostAuthorIdIsRequiredError("Author ID must be greater than 0")
+      throw new PostDomainError("Author ID must be greater than 0")
     }
 
     if (typeof authorId !== "number") {
-      throw new PostAuthorIdIsRequiredError("Author ID must be a number")
+      throw new PostDomainError("Author ID must be a number")
     }
   }
 
@@ -172,9 +143,7 @@ export class Post {
   publish(): void {
     if (this._status === PostStatus.PUBLISHED) {
       // console.warn(`Post ${this.id} is already published.`)
-      throw new PostAlreadyPublishedError(
-        `Post ${this.id} is already published.`
-      )
+      throw new PostDomainError(`Post ${this.id} is already published.`)
     }
     this._status = PostStatus.PUBLISHED
     this._updatedAt = Post.clock.now()
@@ -183,7 +152,7 @@ export class Post {
   unpublish(): void {
     if (this._status === PostStatus.DRAFT) {
       // console.warn(`Post ${this.id} is already drafted.`)
-      throw new PostAlreadyDraftedError(`Post ${this.id} is already drafted.`)
+      throw new PostDomainError(`Post ${this.id} is already drafted.`)
     }
     this._status = PostStatus.DRAFT
     this._updatedAt = Post.clock.now()

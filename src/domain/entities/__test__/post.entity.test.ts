@@ -1,13 +1,4 @@
-import {
-  Clock,
-  PostTitleIsRequiredError,
-  Post,
-  PostStatus,
-  PostContentDomainError,
-  PostAuthorIdIsRequiredError,
-  PostAlreadyPublishedError,
-  PostAlreadyDraftedError,
-} from "../post.entity"
+import { Clock, Post, PostDomainError, PostStatus } from "../post.entity"
 
 class MockClock implements Clock {
   private _currentTime: Date
@@ -62,26 +53,22 @@ describe("Post Entity", () => {
       expect(post.updatedAt).toBe(post.createdAt)
     })
 
-    it("should throw an PostTitleIsRequiredError if title is missing", () => {
+    it("should throw an PostDomainError if title is missing", () => {
       const invalidCreateProps = {
         ...validCreateProps,
         title: "     ",
       }
 
-      expect(() => Post.create(invalidCreateProps)).toThrow(
-        PostTitleIsRequiredError
-      )
+      expect(() => Post.create(invalidCreateProps)).toThrow(PostDomainError)
     })
 
-    it("should throw an PostTitleIsRequiredError if title is too long", () => {
+    it("should throw an PostDomainError if title is too long", () => {
       const invalidCreateProps = {
         ...validCreateProps,
         title: "a".repeat(256),
       }
 
-      expect(() => Post.create(invalidCreateProps)).toThrow(
-        PostTitleIsRequiredError
-      )
+      expect(() => Post.create(invalidCreateProps)).toThrow(PostDomainError)
     })
 
     it("should throw an PostContentDomainError if content is missing", () => {
@@ -90,9 +77,7 @@ describe("Post Entity", () => {
         content: "",
       }
 
-      expect(() => Post.create(invalidCreateProps)).toThrow(
-        PostContentDomainError
-      )
+      expect(() => Post.create(invalidCreateProps)).toThrow(PostDomainError)
     })
 
     it("should throw an PostAuthorIdIsRequiredError if authorId is missing", () => {
@@ -101,31 +86,25 @@ describe("Post Entity", () => {
         authorId: undefined as unknown as number,
       }
 
-      expect(() => Post.create(invalidCreateProps)).toThrow(
-        PostAuthorIdIsRequiredError
-      )
+      expect(() => Post.create(invalidCreateProps)).toThrow(PostDomainError)
     })
 
-    it("should throw an PostAuthorIdIsRequiredError if authorId < 0", () => {
+    it("should throw an PostDomainError if authorId < 0", () => {
       const invalidCreateProps = {
         ...validCreateProps,
         authorId: -10,
       }
 
-      expect(() => Post.create(invalidCreateProps)).toThrow(
-        PostAuthorIdIsRequiredError
-      )
+      expect(() => Post.create(invalidCreateProps)).toThrow(PostDomainError)
     })
 
-    it("should throw an PostAuthorIdIsRequiredError if authorId is not a number", () => {
+    it("should throw an PostDomainError if authorId is not a number", () => {
       const invalidCreateProps = {
         ...validCreateProps,
         authorId: "10" as unknown as number,
       }
 
-      expect(() => Post.create(invalidCreateProps)).toThrow(
-        PostAuthorIdIsRequiredError
-      )
+      expect(() => Post.create(invalidCreateProps)).toThrow(PostDomainError)
     })
   })
 
@@ -148,7 +127,7 @@ describe("Post Entity", () => {
       expect(post.updatedAt).toBeInstanceOf(Date)
     })
 
-    it("should throw an PostTitleIsRequiredError if title is missing", () => {
+    it("should throw an PostDomainError if title is missing", () => {
       const post = Post.create(validCreateProps)
       const invalidUpdateProps = {
         ...validCreateProps,
@@ -156,11 +135,11 @@ describe("Post Entity", () => {
       }
 
       expect(() => post.updateDetails(invalidUpdateProps)).toThrow(
-        PostTitleIsRequiredError
+        PostDomainError
       )
     })
 
-    it("should throw an PostTitleIsRequiredError if title is too long", () => {
+    it("should throw an PostDomainError if title is too long", () => {
       const post = Post.create(validCreateProps)
       const invalidUpdateProps = {
         ...validCreateProps,
@@ -168,11 +147,11 @@ describe("Post Entity", () => {
       }
 
       expect(() => post.updateDetails(invalidUpdateProps)).toThrow(
-        PostTitleIsRequiredError
+        PostDomainError
       )
     })
 
-    it("should throw an PostContentDomainError if content is missing", () => {
+    it("should throw an PostDomainError if content is missing", () => {
       const post = Post.create(validCreateProps)
       const invalidUpdateProps = {
         ...validCreateProps,
@@ -180,7 +159,7 @@ describe("Post Entity", () => {
       }
 
       expect(() => post.updateDetails(invalidUpdateProps)).toThrow(
-        PostContentDomainError
+        PostDomainError
       )
     })
   })
@@ -201,11 +180,11 @@ describe("Post Entity", () => {
       expect(post.updatedAt).toBeInstanceOf(Date)
     })
 
-    it("should throw an error if the post is already published", () => {
+    it("should throw an PostDomainError if the post is already published", () => {
       const post = Post.create(validCreateProps)
       post.publish()
 
-      expect(() => post.publish()).toThrow(PostAlreadyPublishedError)
+      expect(() => post.publish()).toThrow(PostDomainError)
     })
   })
 
@@ -225,9 +204,9 @@ describe("Post Entity", () => {
       expect(post.updatedAt).toBeInstanceOf(Date)
     })
 
-    it("should throw PostAlreadyDraftedError if the post is already drafted", () => {
+    it("should throw PostDomainError if the post is already drafted", () => {
       const post = Post.create(validCreateProps)
-      expect(() => post.unpublish()).toThrow(PostAlreadyDraftedError)
+      expect(() => post.unpublish()).toThrow(PostDomainError)
     })
   })
 

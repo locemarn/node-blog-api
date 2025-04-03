@@ -2,7 +2,7 @@ import "reflect-metadata"
 import { PostRepository } from "../../../ports/postRepository"
 import { CreatePostInput, CreatePostUseCase } from "../createPostUseCase"
 import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
-import { PostAuthorIdIsRequiredError } from "../../../../domain/entities/post.entity"
+import { PostDomainError } from "../../../../domain/entities/post.entity"
 import { AppError } from "../../../../utils/fixtures/errors/AppError"
 
 // Mock the repositories
@@ -106,7 +106,7 @@ describe("CreatePostUseCase", () => {
       }
 
       await expect(createPostUseCase.execute(input)).rejects.toThrow(
-        PostAuthorIdIsRequiredError
+        PostDomainError
       )
     })
 
@@ -117,7 +117,7 @@ describe("CreatePostUseCase", () => {
       }
 
       await expect(createPostUseCase.execute(input)).rejects.toThrow(
-        PostAuthorIdIsRequiredError
+        PostDomainError
       )
     })
 
