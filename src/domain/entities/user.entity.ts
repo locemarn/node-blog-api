@@ -32,13 +32,6 @@ const systemClock: Clock = {
   now: () => new Date(),
 }
 
-const levels = {
-  1: "Very Weak",
-  2: "Weak",
-  3: "Medium",
-  4: "Strong",
-}
-
 export class User {
   private _id: number
   private _name: string
@@ -110,35 +103,6 @@ export class User {
     if (!password?.trim().length) {
       throw new UserDomainError("Password is required")
     }
-
-    const checkPwdFormat = User.checkPwd(password)
-    if (
-      checkPwdFormat === "Very Weak" ||
-      checkPwdFormat === "Weak" ||
-      checkPwdFormat === "Too lengthy" ||
-      checkPwdFormat === "Too short"
-    ) {
-      throw new UserDomainError(`Password is ${checkPwdFormat}`)
-    }
-  }
-
-  private static checkPwd(pwd: string): string {
-    if (pwd.length > 30) {
-      return "Too lengthy"
-    } else if (pwd.length < 8) {
-      return "Too short"
-    }
-
-    const checks = [
-      /[a-z]/, // Lowercase
-      /[A-Z]/, // Uppercase
-      /\d/, // Digit
-      /[@.#$!%^&*.?]/, // Special character
-    ]
-    const score = checks.reduce((acc, rgx) => acc + (rgx.test(pwd) ? 1 : 0), 0)
-
-    // console.log(pwd + " - " + levels[score as keyof typeof levels])
-    return levels[score as keyof typeof levels]
   }
 
   public static create(

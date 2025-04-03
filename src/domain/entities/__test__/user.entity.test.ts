@@ -87,33 +87,6 @@ describe("User Entity", () => {
       expect(user.role).toBe(UserRole.USER)
     })
 
-    it("should throw an UserDomainError if password is too weak", () => {
-      const invalidCreateProps = {
-        ...validCreateProps,
-        password: "weak",
-      }
-
-      expect(() => User.create(invalidCreateProps)).toThrow(UserDomainError)
-    })
-
-    it("should throw an UserDomainError if password is too short", () => {
-      const invalidCreateProps = {
-        ...validCreateProps,
-        password: "short",
-      }
-
-      expect(() => User.create(invalidCreateProps)).toThrow(UserDomainError)
-    })
-
-    it("should throw an UserDomainError if password is too lengthy", () => {
-      const invalidCreateProps = {
-        ...validCreateProps,
-        password: "verylongpassword",
-      }
-
-      expect(() => User.create(invalidCreateProps)).toThrow(UserDomainError)
-    })
-
     it("should throw an UserDomainError if validateEmailRegex fail", () => {
       const invalidCreateProps = {
         ...validCreateProps,
@@ -176,43 +149,6 @@ describe("User Entity", () => {
       const invalidUpdateProps = {
         ...validCreateProps,
         password: "",
-      }
-
-      expect(() => user.updateDetails(invalidUpdateProps)).toThrow(
-        UserDomainError
-      )
-    })
-
-    it("should throw an UserDomainError if password is too lengthy", () => {
-      const user = User.create(validCreateProps)
-      const invalidUpdateProps = {
-        ...validCreateProps,
-        password:
-          "verylongpasswordverylongpasswordverylongpasswordverylongpasswordverylongpasswordverylongpassword",
-      }
-
-      expect(() => user.updateDetails(invalidUpdateProps)).toThrow(
-        UserDomainError
-      )
-    })
-
-    it("should throw an UserDomainError if password is too short", () => {
-      const user = User.create(validCreateProps)
-      const invalidUpdateProps = {
-        ...validCreateProps,
-        password: "short",
-      }
-
-      expect(() => user.updateDetails(invalidUpdateProps)).toThrow(
-        UserDomainError
-      )
-    })
-
-    it("should throw an UserDomainError if password is too weak", () => {
-      const user = User.create(validCreateProps)
-      const invalidUpdateProps = {
-        ...validCreateProps,
-        password: "weak",
       }
 
       expect(() => user.updateDetails(invalidUpdateProps)).toThrow(
