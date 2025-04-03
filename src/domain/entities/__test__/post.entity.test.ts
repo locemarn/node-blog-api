@@ -98,7 +98,7 @@ describe("Post Entity", () => {
     it("should throw an PostAuthorIdIsRequiredError if authorId is missing", () => {
       const invalidCreateProps = {
         ...validCreateProps,
-        authorId: undefined as any,
+        authorId: undefined as unknown as number,
       }
 
       expect(() => Post.create(invalidCreateProps)).toThrow(
@@ -120,7 +120,7 @@ describe("Post Entity", () => {
     it("should throw an PostAuthorIdIsRequiredError if authorId is not a number", () => {
       const invalidCreateProps = {
         ...validCreateProps,
-        authorId: "10" as any,
+        authorId: "10" as unknown as number,
       }
 
       expect(() => Post.create(invalidCreateProps)).toThrow(

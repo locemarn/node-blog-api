@@ -107,7 +107,7 @@ export class Post {
 
   // --- Validation logic ---
   private static validateTitle(title: string) {
-    if (!title || !title.trim().length) {
+    if (!title?.trim().length) {
       throw new PostTitleIsRequiredError("Title is required")
     }
     if (title.length > 255) {
@@ -118,7 +118,7 @@ export class Post {
   }
 
   private static validateContent(content: string) {
-    if (!content || !content.trim().length) {
+    if (!content?.trim().length) {
       throw new PostContentDomainError("Content is required")
     }
   }
