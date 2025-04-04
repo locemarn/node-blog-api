@@ -46,8 +46,8 @@ describe("Comment Entity", () => {
       expect(comment.content).toBe(validCreateProps.content)
       expect(comment.postId).toBe(validCreateProps.postId)
       expect(comment.authorId).toBe(validCreateProps.authorId)
-      expect(comment.createdAt).toBeDefined()
-      expect(comment.updatedAt).toBeDefined()
+      expect(comment.created_at).toBeDefined()
+      expect(comment.updated_at).toBeDefined()
     })
 
     it("should throw a CommentDomainError if content is missing", () => {

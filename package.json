@@ -2,10 +2,9 @@
   "name": "blog-api",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -35,6 +34,7 @@
     "@eslint/js": "^9.23.0",
     "@prisma/client": "^6.5.0",
     "@types/bcrypt": "^5.0.2",
+    "@types/express": "^5.0.1",
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.14.0",
@@ -52,6 +52,7 @@
     "prisma": "^6.5.0",
     "ts-jest": "^29.3.1",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.29.0"
   },
@@ -68,5 +69,9 @@
     "reflect-metadata": "^0.2.2",
     "tsyringe": "^4.9.1",
     "zod": "^3.24.2"
-  }
+  },
+  "moduleDirectories": [
+    "node_modules",
+    "src"
+  ]
 }

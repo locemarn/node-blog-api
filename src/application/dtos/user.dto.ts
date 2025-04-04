@@ -1,18 +1,18 @@
-import { UserRole } from "../../domain/entities/user.entity"
+import { Role } from "@prisma/client"
 
 export interface CreateUserInput {
-  name: string
+  username: string
   email: string
   password: string
-  role?: UserRole
+  role: Role
 }
 
 export interface UpdateUserInput {
   id: number
-  name?: string
+  username?: string
   email?: string
   password?: string
-  role?: UserRole
+  role?: Role
 }
 
 export interface DeleteUserInput {

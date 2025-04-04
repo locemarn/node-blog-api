@@ -5,14 +5,16 @@ import { AppError } from "../../../utils/fixtures/errors/AppError"
 import { UserRepository } from "../../../domain/repositories/userRepository"
 import { UpdateUserInput } from "../../dtos/user.dto"
 import { IPasswordHasher } from "../../contracts/password-hasher.interface"
+import { BcryptPasswordHasher } from "../../../infrastructure/cryptography/bcrypt-password-hasher"
 @injectable()
 export class UpdateUserUseCase {
+  private _passwordHasher: IPasswordHasher
   constructor(
     @inject("UserRepository")
-    private userRepository: UserRepository,
-    @inject("IPasswordHasher")
-    private passwordHasher: IPasswordHasher
-  ) {}
+    private userRepository: UserRepository
+  ) {
+    this._passwordHasher = new BcryptPasswordHasher()
+  }
 
   async execute(input: UpdateUserInput): Promise<User> {
     const user = await this.userRepository.findById(input.id)
@@ -21,21 +23,27 @@ export class UpdateUserUseCase {
       throw new NotFoundError("User not found")
     }
 
-    user.updateDetails({
-      name: input.name ?? user.name,
-      email: input.email ?? user.email,
-      password: input.password
-        ? await this.passwordHasher.hash(input?.password)
-        : user.password,
-      role: input.role ?? user.role,
-    })
+    if (input.username) {
+      user.updateProfile(input.username)
+    }
+
+    if (input.password) {
+      // console.log("input.password", input.password)
+      const hashedPassword = await this._passwordHasher.hash(input.password)
+      // console.log("hashedPassword", hashedPassword)
+      user.changePassword(hashedPassword)
+    }
+
+    if (input.role) {
+      user.updateRole(input.role)
+    }
 
     try {
-      await this.userRepository.update(user)
+      const updatedUser = await this.userRepository.update(user)
+      // console.log("updatedUser", updatedUser)
+      return updatedUser
     } catch (error) {
       throw new AppError("Failed to update user", 500, error)
     }
-
-    return user
   }
 }

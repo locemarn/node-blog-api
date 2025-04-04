@@ -20,8 +20,8 @@ export interface CommentProps {
   content: string
   postId: number
   authorId: number
-  createdAt: Date
-  updatedAt: Date
+  created_at: Date
+  updated_at: Date
 }
 
 export class Comment {
@@ -29,8 +29,8 @@ export class Comment {
   private _content: string
   private _postId: number
   private _authorId: number
-  private _createdAt: Date
-  private _updatedAt: Date
+  private _created_at: Date
+  private _updated_at: Date
 
   private static clock: Clock = systemClock
 
@@ -39,8 +39,8 @@ export class Comment {
     this._content = props.content
     this._postId = props.postId
     this._authorId = props.authorId
-    this._createdAt = props.createdAt
-    this._updatedAt = props.updatedAt
+    this._created_at = props.created_at
+    this._updated_at = props.updated_at
   }
 
   get id(): number {
@@ -59,12 +59,12 @@ export class Comment {
     return this._authorId
   }
 
-  get createdAt(): Date {
-    return this._createdAt
+  get created_at(): Date {
+    return this._created_at
   }
 
-  get updatedAt(): Date {
-    return this._updatedAt
+  get updated_at(): Date {
+    return this._updated_at
   }
 
   private static validateContent(content: string): void {
@@ -104,7 +104,7 @@ export class Comment {
   }
 
   public static create(
-    props: Omit<CommentProps, "id" | "createdAt" | "updatedAt">
+    props: Omit<CommentProps, "id" | "created_at" | "updated_at">
   ): Comment {
     Comment.validateContent(props.content)
     Comment.validatePostId(props.postId)
@@ -115,8 +115,8 @@ export class Comment {
     const comment = new Comment({
       ...props,
       id: Number(randomInt(1, 1000)),
-      createdAt: now,
-      updatedAt: now,
+      created_at: now,
+      updated_at: now,
     })
 
     return comment
@@ -126,7 +126,7 @@ export class Comment {
     Comment.validateContent(props.content)
 
     this._content = props.content
-    this._updatedAt = Comment.clock.now()
+    this._updated_at = Comment.clock.now()
 
     return this
   }

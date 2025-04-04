@@ -1,19 +1,23 @@
 import { injectable } from "tsyringe"
 import { inject } from "tsyringe"
 import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
-import { User, UserRole } from "../../../domain/entities/user.entity"
+import { User } from "../../../domain/entities/user.entity"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
 import { UserRepository } from "../../../domain/repositories/userRepository"
 import { CreateUserInput } from "../../dtos/user.dto"
 import { IPasswordHasher } from "../../contracts/password-hasher.interface"
+import { Role } from "@prisma/client"
+import { BcryptPasswordHasher } from "../../../infrastructure/cryptography/bcrypt-password-hasher"
+
 @injectable()
 export class CreateUserUseCase {
+  private _passwordHasher: IPasswordHasher
   constructor(
     @inject("UserRepository")
-    private userRepository: UserRepository,
-    @inject("IPasswordHasher")
-    private passwordHasher: IPasswordHasher
-  ) {}
+    private userRepository: UserRepository
+  ) {
+    this._passwordHasher = new BcryptPasswordHasher()
+  }
 
   /**
    * Executes the user creation logic.
@@ -23,42 +27,44 @@ export class CreateUserUseCase {
    * @throws {AppError} for other specific application or persistence errors.
    */
   async execute(input: CreateUserInput): Promise<User> {
-    // 1. --- Input Validation ---
-    // Basic validation (non-empty fields). More complex validation might use a dedicated library/service.
-    if (!input.name?.trim()) {
-      throw new ValidationError("Name is required")
+    if (!input.username?.trim()) {
+      throw new ValidationError("Username is required")
     }
 
     if (!input.email?.trim()) {
       throw new ValidationError("Email is required")
     }
 
-    console.log("Input", input)
     if (!input.password?.trim()) {
       throw new ValidationError("Password is required")
     }
 
-    const hashedPassword = await this.passwordHasher.hash(input.password)
-    // 2. --- Domain Logic ---
-    // Create the user entity
-    const user = User.create({
-      ...input,
-      password: hashedPassword,
-      role: input.role ?? UserRole.USER,
-    })
-
-    // 3. --- Persistence ---
-    // Save the user entity to the database
     try {
-      await this.userRepository.save(user)
-    } catch (error) {
-      throw new AppError(
-        "Failed to save the user due to a persistence issue.",
-        500,
-        error
-      )
-    }
+      // Check if user already exists
+      const existingUser = await this.userRepository.findByEmail(input.email)
+      if (existingUser) {
+        throw new ValidationError("User already exists")
+      }
 
-    return user
+      const hashedPassword = await this._passwordHasher.hash(input.password)
+
+      const validRoles = [Role.ADMIN, Role.USER]
+      if (input.role && !validRoles.includes(input.role)) {
+        throw new ValidationError("Invalid user role")
+      }
+
+      const userEntity = User.create({
+        username: input.username,
+        email: input.email,
+        password: hashedPassword,
+        role: input.role ?? Role.USER,
+      })
+      const newUser = await this.userRepository.save(userEntity)
+      return newUser
+    } catch (error) {
+      const err = error as Error
+      // console.error("error ---->", err.message)
+      throw new AppError(err.message, 500, error)
+    }
   }
 }

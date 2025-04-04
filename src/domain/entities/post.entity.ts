@@ -22,8 +22,8 @@ export interface PostProps {
   content: string
   authorId: number
   status: PostStatus
-  createdAt: Date
-  updatedAt: Date
+  created_at: Date
+  updated_at: Date
 }
 
 export interface Clock {
@@ -40,8 +40,8 @@ export class Post {
   private _content: string
   private _authorId: number
   private _status: PostStatus
-  private _createdAt: Date
-  private _updatedAt: Date
+  private _created_at: Date
+  private _updated_at: Date
 
   private static clock: Clock = systemClock
 
@@ -51,8 +51,8 @@ export class Post {
     this._content = props.content
     this._authorId = props.authorId
     this._status = props.status
-    this._createdAt = props.createdAt
-    this._updatedAt = props.updatedAt
+    this._created_at = props.created_at
+    this._updated_at = props.updated_at
   }
 
   // --- Getters for Encapsulation ---
@@ -71,11 +71,11 @@ export class Post {
   get status(): PostStatus {
     return this._status
   }
-  get createdAt(): Date {
-    return this._createdAt
+  get created_at(): Date {
+    return this._created_at
   }
-  get updatedAt(): Date {
-    return this._updatedAt
+  get updated_at(): Date {
+    return this._updated_at
   }
 
   // --- Validation logic ---
@@ -111,7 +111,7 @@ export class Post {
   // --- Factory method to create a new Post ---
 
   public static create(
-    props: Omit<PostProps, "id" | "createdAt" | "updatedAt">
+    props: Omit<PostProps, "id" | "created_at" | "updated_at">
   ): Post {
     Post.validateTitle(props.title)
     Post.validateContent(props.content)
@@ -123,8 +123,8 @@ export class Post {
       ...props,
       id: Number(randomInt(1, 1000)),
       status: PostStatus.DRAFT,
-      createdAt: now,
-      updatedAt: now,
+      created_at: now,
+      updated_at: now,
     })
 
     return post
@@ -136,7 +136,7 @@ export class Post {
 
     this._title = props.title
     this._content = props.content
-    this._updatedAt = Post.clock.now()
+    this._updated_at = Post.clock.now()
   }
 
   // --- Dommain Methods ---
@@ -146,7 +146,7 @@ export class Post {
       throw new PostDomainError(`Post ${this.id} is already published.`)
     }
     this._status = PostStatus.PUBLISHED
-    this._updatedAt = Post.clock.now()
+    this._updated_at = Post.clock.now()
   }
 
   unpublish(): void {
@@ -155,7 +155,7 @@ export class Post {
       throw new PostDomainError(`Post ${this.id} is already drafted.`)
     }
     this._status = PostStatus.DRAFT
-    this._updatedAt = Post.clock.now()
+    this._updated_at = Post.clock.now()
   }
 
   public static setClock(clock: Clock): void {

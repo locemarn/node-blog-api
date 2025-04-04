@@ -87,9 +87,6 @@ model Like {
 }
 
 enum Role {
-  superuser
-  admin
-  reader
-  editor
-  tester
+  ADMIN
+  USER
 }
