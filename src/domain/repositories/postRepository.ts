@@ -4,7 +4,7 @@ export interface FindAllOptions {
   page: number
   limit: number
   status?: PostStatus
-  sortBy?: "createdAt" | "updatedAt"
+  sortBy?: "created_at" | "updated_at"
   sortOrder?: "ASC" | "DESC"
 }
 

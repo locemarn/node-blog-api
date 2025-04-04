@@ -1,6 +1,5 @@
 import "reflect-metadata"
 import { GetUserByEmailUseCase } from "../getUserByEmailUseCase"
-import { UserRole } from "../../../../domain/entities/user.entity"
 import { User } from "../../../../domain/entities/user.entity"
 import { AppError } from "../../../../utils/fixtures/errors/AppError"
 import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
@@ -28,10 +27,10 @@ describe("getUserByEmailUseCase", () => {
 
   it("should return a user by email", async () => {
     const user = User.create({
-      name: "John Doe",
+      username: "John Doe",
       email: "john.doe@example.com",
       password: "password",
-      role: UserRole.ADMIN,
+      role: "USER",
     })
 
     mockUserRepository.findByEmail.mockResolvedValue(user)
@@ -40,7 +39,7 @@ describe("getUserByEmailUseCase", () => {
 
     expect(result).toBeDefined()
     expect(result.id).toBe(user.id)
-    expect(result.name).toBe(user.name)
+    expect(result.username).toBe(user.username)
     expect(result.email).toBe(user.email)
     expect(result.role).toBe(user.role)
   })

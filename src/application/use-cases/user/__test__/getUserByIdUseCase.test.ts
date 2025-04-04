@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import { GetUserByIdUseCase } from "../getUserByIdUseCase"
-import { User, UserRole } from "../../../../domain/entities/user.entity"
+import { User } from "../../../../domain/entities/user.entity"
 import { AppError } from "../../../../utils/fixtures/errors/AppError"
 import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
 import { UserRepository } from "../../../../domain/repositories/userRepository"
@@ -27,10 +27,10 @@ describe("getUserByIdUseCase", () => {
 
   it("should return a user by id", async () => {
     const user = User.create({
-      name: "John Doe",
+      username: "John Doe",
       email: "john.doe@example.com",
       password: "password",
-      role: UserRole.ADMIN,
+      role: "USER",
     })
 
     mockUserRepository.findById.mockResolvedValue(user)
@@ -39,7 +39,7 @@ describe("getUserByIdUseCase", () => {
 
     expect(result).toBeDefined()
     expect(result.id).toBe(user.id)
-    expect(result.name).toBe(user.name)
+    expect(result.username).toBe(user.username)
     expect(result.email).toBe(user.email)
     expect(result.role).toBe(user.role)
   })

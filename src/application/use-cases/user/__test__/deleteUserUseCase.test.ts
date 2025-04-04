@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import "reflect-metadata"
 import { DeleteUserUseCase } from "../deleteUserUseCase"
-import { User, UserRole } from "../../../../domain/entities/user.entity"
+import { User } from "../../../../domain/entities/user.entity"
 import { AppError } from "../../../../utils/fixtures/errors/AppError"
 import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
 import { UserRepository } from "../../../../domain/repositories/userRepository"
@@ -23,10 +23,10 @@ describe("DeleteUserUseCase", () => {
 
   it("should delete a user successfully", async () => {
     const user = User.create({
-      name: "John Doe",
+      username: "John Doe",
       email: "john.doe@example.com",
       password: "password",
-      role: UserRole.ADMIN,
+      role: "USER",
     })
 
     mockUserRepository.findById.mockResolvedValue(user)

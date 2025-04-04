@@ -1,116 +1,157 @@
 import "reflect-metadata"
+import { User } from "../../../../domain/entities/user.entity"
 import { UserRepository } from "../../../../domain/repositories/userRepository"
-import { CreateUserUseCase } from "../createUserUseCase"
-import { IPasswordHasher } from "../../../contracts/password-hasher.interface"
 import { CreateUserInput } from "../../../dtos/user.dto"
-import { UserRole } from "../../../../domain/entities/user.entity"
-import { AppError } from "../../../../utils/fixtures/errors/AppError"
-import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
+import { CreateUserUseCase } from "../createUserUseCase"
+// import BcryptPasswordHasher from "../../../infrastructure/cryptography/bcrypt-password-hasher"
+
+const mockHash = jest.fn()
+jest.mock(
+  "../../../../infrastructure/cryptography/bcrypt-password-hasher",
+  () => {
+    return {
+      BcryptPasswordHasher: jest.fn().mockImplementation(() => {
+        // The instance created by `new BcryptPasswordHasher()` inside the use case
+        // will have this shape.
+        return {
+          hash: mockHash, // Provide the mock function for the 'hash' method
+          compare: jest.fn(), // Add compare if it exists and might be called (though not in this use case)
+        }
+      }),
+    }
+  }
+)
 
 const mockUserRepository: jest.Mocked<UserRepository> = {
+  findByEmail: jest.fn(),
   save: jest.fn(),
   findById: jest.fn(),
-  findByEmail: jest.fn(),
   update: jest.fn(),
   deleteById: jest.fn(),
 }
 
-const validCreateUserInput: CreateUserInput = {
-  name: "Test User",
+const validInput: CreateUserInput = {
+  username: "Test User",
   email: "test@example.com",
-  password: "password1234$",
-  role: UserRole.ADMIN,
+  password: "password123",
+  role: "USER",
 }
+
+const hashedPassword = "hashed_password_from_mock"
 
 describe("CreateUserUseCase", () => {
   let createUserUseCase: CreateUserUseCase
-  const mockPasswordHasher: jest.Mocked<IPasswordHasher> = {
-    hash: jest.fn(),
-    compare: jest.fn(), // Include compare if it's in your interface
-  }
 
   beforeEach(() => {
     jest.clearAllMocks()
-    createUserUseCase = new CreateUserUseCase(
-      mockUserRepository,
-      mockPasswordHasher
+    createUserUseCase = new CreateUserUseCase(mockUserRepository)
+  })
+
+  // --- Test Cases ---
+  it("should create a new user", async () => {
+    // Arrange
+    const input = { ...validInput }
+    const expectedCreateUserId = 1
+    const now = new Date()
+
+    mockUserRepository.findByEmail.mockResolvedValue(null) // User does not exist
+    mockHash.mockResolvedValue(hashedPassword) // Returns password hashed
+
+    mockUserRepository.save.mockImplementation((user: User) => {
+      return Promise.resolve({
+        username: user.username,
+        email: user.email,
+        password: user.password,
+        role: user.role,
+        id: expectedCreateUserId,
+        created_at: now,
+        updated_at: now,
+      } as User)
+    })
+
+    // Act
+    const sut = await createUserUseCase.execute(input)
+
+    expect(sut).toBeDefined()
+    expect(sut.id).toBe(expectedCreateUserId)
+    expect(sut.username).toBe(input.username)
+    expect(sut.email).toBe(input.email)
+    expect(sut.role).toBe(input.role)
+    expect(sut.created_at).toBe(now)
+    expect(sut.updated_at).toBe(now)
+    expect(sut.password).toBe(hashedPassword)
+    expect(mockHash).toHaveBeenCalledWith(input.password)
+  })
+
+  it("should create an user if 'USER' role as default, if role is not provider", async () => {
+    // Arrange
+    const input = { ...validInput, role: null } as unknown as CreateUserInput
+
+    // Act
+    const sut = await createUserUseCase.execute(input)
+
+    // Assert
+    expect(sut).toBeDefined()
+    expect(sut.role).toBe("USER")
+  })
+
+  it("should throw an error if the user already exists", async () => {
+    // Arrange
+    const input = { ...validInput }
+    const existingUser = { ...validInput, id: 1 } as User
+    mockUserRepository.findByEmail.mockResolvedValue(existingUser)
+
+    // Act & Assert
+    await expect(createUserUseCase.execute(input)).rejects.toThrow(
+      "User already exists"
     )
   })
 
-  describe("execute", () => {
-    it("should create and save a user successfully", async () => {
-      // Arrange
-      const input: CreateUserInput = {
-        ...validCreateUserInput,
-      }
+  it("should throw an error if the user is not valid", async () => {
+    // Arrange
+    const input = { ...validInput, username: "" }
 
-      mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
+    // Act & Assert
+    await expect(createUserUseCase.execute(input)).rejects.toThrow(
+      "Username is required"
+    )
+  })
 
-      // Act
-      const result = await createUserUseCase.execute(input)
-      // Assert
-      expect(result).toBeDefined()
-      expect(result.id).toBeDefined()
-      expect(result.name).toBe(input.name)
-    })
+  it("should throw an error if the email is not valid", async () => {
+    // Arrange
+    const input = { ...validInput, email: "" }
 
-    it("should throw a ValidationError if name is empty", async () => {
-      const input: CreateUserInput = {
-        ...validCreateUserInput,
-        name: "",
-      }
+    // Act & Assert
+    await expect(createUserUseCase.execute(input)).rejects.toThrow(
+      "Email is required"
+    )
+  })
 
-      await expect(createUserUseCase.execute(input)).rejects.toThrow(
-        ValidationError
-      )
-    })
+  it("should throw an error if the password is not valid", async () => {
+    // Arrange
+    const input = { ...validInput, password: "" }
 
-    it("should throw a ValidationError if email is empty", async () => {
-      const input: CreateUserInput = {
-        ...validCreateUserInput,
-        email: "",
-      }
+    // Act & Assert
+    await expect(createUserUseCase.execute(input)).rejects.toThrow(
+      "Password is required"
+    )
+  })
 
-      await expect(createUserUseCase.execute(input)).rejects.toThrow(
-        ValidationError
-      )
-    })
+  it("should throw an error if the role is not valid", async () => {
+    // Arrange
+    const input = {
+      email: "valid_email@example.com",
+      password: "valid_password",
+      username: "valid_username",
+      role: "INVALID_ROLE",
+    } as unknown as CreateUserInput
 
-    it("should throw a ValidationError if password is empty", async () => {
-      const input: CreateUserInput = {
-        ...validCreateUserInput,
-        password: "",
-      }
+    mockUserRepository.findByEmail.mockResolvedValue(null) // User does not exist
+    mockHash.mockResolvedValue(hashedPassword)
 
-      await expect(createUserUseCase.execute(input)).rejects.toThrow(
-        ValidationError
-      )
-    })
-
-    it("should returns a user with the default role if role is not provided", async () => {
-      const input: CreateUserInput = {
-        ...validCreateUserInput,
-        role: undefined,
-      }
-
-      mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
-
-      const result = await createUserUseCase.execute(input)
-
-      expect(result).toBeDefined()
-      expect(result.role).toBe(UserRole.USER)
-    })
-
-    it("should throw an AppError if the user is not saved", async () => {
-      const input: CreateUserInput = {
-        ...validCreateUserInput,
-      }
-
-      mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
-
-      mockUserRepository.save.mockRejectedValue(new Error("Failed to save"))
-
-      await expect(createUserUseCase.execute(input)).rejects.toThrow(AppError)
-    })
+    // Act & Assert
+    await expect(createUserUseCase.execute(input)).rejects.toThrow(
+      "Invalid user role"
+    )
   })
 })

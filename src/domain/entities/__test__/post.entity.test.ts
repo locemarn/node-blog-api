@@ -46,11 +46,11 @@ describe("Post Entity", () => {
       expect(post.authorId).toBe(validCreateProps.authorId)
       expect(post.status).toBe(validCreateProps.status)
       expect(post.status).toBe(PostStatus.DRAFT)
-      expect(post.createdAt).toBeDefined()
-      expect(post.createdAt).toBeInstanceOf(Date)
-      expect(post.updatedAt).toBeDefined()
-      expect(post.updatedAt).toBeInstanceOf(Date)
-      expect(post.updatedAt).toBe(post.createdAt)
+      expect(post.created_at).toBeDefined()
+      expect(post.created_at).toBeInstanceOf(Date)
+      expect(post.updated_at).toBeDefined()
+      expect(post.updated_at).toBeInstanceOf(Date)
+      expect(post.updated_at).toBe(post.created_at)
     })
 
     it("should throw an PostDomainError if title is missing", () => {
@@ -111,7 +111,7 @@ describe("Post Entity", () => {
   describe("Post.updateDetails method", () => {
     it("should update the title and content of the post", () => {
       const post = Post.create(validCreateProps)
-      const initialUpdatedAt = post.updatedAt
+      const initialupdated_at = post.updated_at
       const updatedTitle = "Updated Title"
       const updatedContent = "Updated Content"
 
@@ -123,8 +123,8 @@ describe("Post Entity", () => {
 
       expect(post.title).toBe(updatedTitle)
       expect(post.content).toBe(updatedContent)
-      expect(post.updatedAt).not.toBe(initialUpdatedAt)
-      expect(post.updatedAt).toBeInstanceOf(Date)
+      expect(post.updated_at).not.toBe(initialupdated_at)
+      expect(post.updated_at).toBeInstanceOf(Date)
     })
 
     it("should throw an PostDomainError if title is missing", () => {
@@ -167,17 +167,17 @@ describe("Post Entity", () => {
   describe("Post.publish method", () => {
     it("should publish the post", () => {
       const post = Post.create(validCreateProps)
-      const initialUpdatedAt = post.updatedAt
+      const initialupdated_at = post.updated_at
 
       mockClock.tick(5000)
       post.publish()
 
       expect(post.status).toBe(PostStatus.PUBLISHED)
-      expect(post.updatedAt.getTime()).toBeGreaterThan(
-        initialUpdatedAt.getTime()
+      expect(post.updated_at.getTime()).toBeGreaterThan(
+        initialupdated_at.getTime()
       )
-      expect(post.updatedAt).toEqual(mockClock.now())
-      expect(post.updatedAt).toBeInstanceOf(Date)
+      expect(post.updated_at).toEqual(mockClock.now())
+      expect(post.updated_at).toBeInstanceOf(Date)
     })
 
     it("should throw an PostDomainError if the post is already published", () => {
@@ -193,15 +193,15 @@ describe("Post Entity", () => {
       const post = Post.create(validCreateProps)
       post.publish()
       mockClock.tick(2000)
-      const publishedAt = post.updatedAt
+      const publishedAt = post.updated_at
 
       mockClock.tick(5000)
       post.unpublish()
 
       expect(post.status).toBe(PostStatus.DRAFT)
-      expect(post.updatedAt.getTime()).toBeGreaterThan(publishedAt.getTime())
-      expect(post.updatedAt).toEqual(mockClock.now())
-      expect(post.updatedAt).toBeInstanceOf(Date)
+      expect(post.updated_at.getTime()).toBeGreaterThan(publishedAt.getTime())
+      expect(post.updated_at).toEqual(mockClock.now())
+      expect(post.updated_at).toBeInstanceOf(Date)
     })
 
     it("should throw PostDomainError if the post is already drafted", () => {
@@ -218,9 +218,9 @@ describe("Post Entity", () => {
       expect(post.content).toBe(validCreateProps.content)
       expect(post.authorId).toBe(validCreateProps.authorId)
       expect(post.status).toBe(validCreateProps.status)
-      expect(post.createdAt).toBeDefined()
-      expect(post.createdAt).toBeInstanceOf(Date)
-      expect(post.updatedAt).toBeDefined()
+      expect(post.created_at).toBeDefined()
+      expect(post.created_at).toBeInstanceOf(Date)
+      expect(post.updated_at).toBeDefined()
     })
   })
 })
