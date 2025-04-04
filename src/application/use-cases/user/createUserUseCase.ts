@@ -1,16 +1,10 @@
 import { injectable } from "tsyringe"
 import { inject } from "tsyringe"
-import { UserRepository } from "../../ports/userRepository"
 import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
 import { User, UserRole } from "../../../domain/entities/user.entity"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
-
-export interface CreateUserInput {
-  name: string
-  email: string
-  password: string
-  role?: UserRole
-}
+import { UserRepository } from "../../../domain/repositories/userRepository"
+import { CreateUserInput } from "../../dtos/user.dto"
 
 @injectable()
 export class CreateUserUseCase {

@@ -1,9 +1,10 @@
 import "reflect-metadata"
-import { UserRepository } from "../../../ports/userRepository"
-import { GetUserByIdInput, GetUserByIdUseCase } from "../getUserByIdUseCase"
+import { GetUserByIdUseCase } from "../getUserByIdUseCase"
 import { User, UserRole } from "../../../../domain/entities/user.entity"
 import { AppError } from "../../../../utils/fixtures/errors/AppError"
 import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
+import { UserRepository } from "../../../../domain/repositories/userRepository"
+import { GetUserByIdInput } from "../../../dtos/user.dto"
 
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),

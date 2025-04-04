@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import "reflect-metadata"
-import { UserRepository } from "../../../ports/userRepository"
 import { User, UserRole } from "../../../../domain/entities/user.entity"
-import { UpdateUserInput, UpdateUserUseCase } from "../updateUserUseCase"
+import { UpdateUserUseCase } from "../updateUserUseCase"
 import { NotFoundError } from "../../../../utils/fixtures/errors/NotFoundError"
 import { AppError } from "../../../../utils/fixtures/errors/AppError"
+import { UserRepository } from "../../../../domain/repositories/userRepository"
+import { UpdateUserInput } from "../../../dtos/user.dto"
 
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),

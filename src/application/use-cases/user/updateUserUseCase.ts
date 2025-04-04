@@ -1,16 +1,9 @@
 import { injectable } from "tsyringe"
-import { User, UserRole } from "../../../domain/entities/user.entity"
+import { User } from "../../../domain/entities/user.entity"
 import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError"
-import { UserRepository } from "../../ports/userRepository"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
-
-export interface UpdateUserInput {
-  id: number
-  name?: string
-  email?: string
-  password?: string
-  role?: UserRole
-}
+import { UserRepository } from "../../../domain/repositories/userRepository"
+import { UpdateUserInput } from "../../dtos/user.dto"
 
 @injectable()
 export class UpdateUserUseCase {

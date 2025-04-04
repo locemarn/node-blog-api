@@ -1,14 +1,9 @@
 import { injectable, inject } from "tsyringe"
-import { PostRepository } from "../../ports/postRepository"
 import { Post, PostStatus } from "../../../domain/entities/post.entity"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
 import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
-
-export interface CreatePostInput {
-  title: string
-  content: string
-  authorId: number
-}
+import { PostRepository } from "../../../domain/repositories/postRepository"
+import { CreatePostInput } from "../../dtos/post.dto"
 
 @injectable() // Decorator for DI container
 export class CreatePostUseCase {
