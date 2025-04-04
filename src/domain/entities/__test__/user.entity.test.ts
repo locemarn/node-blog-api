@@ -111,6 +111,7 @@ describe("User Entity", () => {
         name: updatedName,
         email: updatedEmail,
         password: updatedPassword,
+        role: user.role,
       })
 
       expect(user.name).toBe(updatedName)

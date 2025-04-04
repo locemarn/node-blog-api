@@ -125,7 +125,9 @@ export class User {
     return user
   }
 
-  updateDetails(props: Pick<UserProps, "name" | "email" | "password">) {
+  updateDetails(
+    props: Pick<UserProps, "name" | "email" | "password" | "role">
+  ) {
     User.validateName(props.name)
     User.validateEmail(props.email)
     User.validatePassword(props.password)
