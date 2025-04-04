@@ -1,13 +1,9 @@
 import { injectable } from "tsyringe"
-import { UserRepository } from "../../ports/userRepository"
 import { User } from "../../../domain/entities/user.entity"
 import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
 import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
-
-export interface GetUserByIdInput {
-  id: number
-}
+import { UserRepository } from "../../../domain/repositories/userRepository"
 
 @injectable()
 export class GetUserByIdUseCase {

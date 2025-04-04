@@ -1,22 +1,18 @@
 import { injectable } from "tsyringe"
 import { inject } from "tsyringe"
-import { UserRepository } from "../../ports/userRepository"
 import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
 import { User, UserRole } from "../../../domain/entities/user.entity"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
-
-export interface CreateUserInput {
-  name: string
-  email: string
-  password: string
-  role?: UserRole
-}
-
+import { UserRepository } from "../../../domain/repositories/userRepository"
+import { CreateUserInput } from "../../dtos/user.dto"
+import { IPasswordHasher } from "../../contracts/password-hasher.interface"
 @injectable()
 export class CreateUserUseCase {
   constructor(
     @inject("UserRepository")
-    private userRepository: UserRepository
+    private userRepository: UserRepository,
+    @inject("IPasswordHasher")
+    private passwordHasher: IPasswordHasher
   ) {}
 
   /**
@@ -37,14 +33,17 @@ export class CreateUserUseCase {
       throw new ValidationError("Email is required")
     }
 
+    console.log("Input", input)
     if (!input.password?.trim()) {
       throw new ValidationError("Password is required")
     }
 
+    const hashedPassword = await this.passwordHasher.hash(input.password)
     // 2. --- Domain Logic ---
     // Create the user entity
     const user = User.create({
       ...input,
+      password: hashedPassword,
       role: input.role ?? UserRole.USER,
     })
 

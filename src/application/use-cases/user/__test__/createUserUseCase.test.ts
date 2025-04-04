@@ -1,12 +1,11 @@
 import "reflect-metadata"
-import { UserRepository } from "../../../ports/userRepository"
-import {
-  CreateUserInput,
-  CreateUserUseCase,
-} from "../../user/createUserUseCase"
+import { UserRepository } from "../../../../domain/repositories/userRepository"
+import { CreateUserUseCase } from "../createUserUseCase"
+import { IPasswordHasher } from "../../../contracts/password-hasher.interface"
+import { CreateUserInput } from "../../../dtos/user.dto"
 import { UserRole } from "../../../../domain/entities/user.entity"
-import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
 import { AppError } from "../../../../utils/fixtures/errors/AppError"
+import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
 
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),
@@ -19,16 +18,23 @@ const mockUserRepository: jest.Mocked<UserRepository> = {
 const validCreateUserInput: CreateUserInput = {
   name: "Test User",
   email: "test@example.com",
-  password: "password",
+  password: "password1234$",
   role: UserRole.ADMIN,
 }
 
 describe("CreateUserUseCase", () => {
   let createUserUseCase: CreateUserUseCase
+  const mockPasswordHasher: jest.Mocked<IPasswordHasher> = {
+    hash: jest.fn(),
+    compare: jest.fn(), // Include compare if it's in your interface
+  }
 
   beforeEach(() => {
     jest.clearAllMocks()
-    createUserUseCase = new CreateUserUseCase(mockUserRepository)
+    createUserUseCase = new CreateUserUseCase(
+      mockUserRepository,
+      mockPasswordHasher
+    )
   })
 
   describe("execute", () => {
@@ -38,9 +44,10 @@ describe("CreateUserUseCase", () => {
         ...validCreateUserInput,
       }
 
+      mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
+
       // Act
       const result = await createUserUseCase.execute(input)
-
       // Assert
       expect(result).toBeDefined()
       expect(result.id).toBeDefined()
@@ -86,6 +93,8 @@ describe("CreateUserUseCase", () => {
         role: undefined,
       }
 
+      mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
+
       const result = await createUserUseCase.execute(input)
 
       expect(result).toBeDefined()
@@ -96,6 +105,8 @@ describe("CreateUserUseCase", () => {
       const input: CreateUserInput = {
         ...validCreateUserInput,
       }
+
+      mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
 
       mockUserRepository.save.mockRejectedValue(new Error("Failed to save"))
 

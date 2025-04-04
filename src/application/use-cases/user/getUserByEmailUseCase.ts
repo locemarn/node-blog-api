@@ -1,13 +1,10 @@
 import { injectable } from "tsyringe"
-import { UserRepository } from "../../ports/userRepository"
 import { User } from "../../../domain/entities/user.entity"
 import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
 import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
-
-export interface GetUserByEmailInput {
-  email: string
-}
+import { UserRepository } from "../../../domain/repositories/userRepository"
+import { GetUserByEmailInput } from "../../dtos/user.dto"
 
 @injectable()
 export class GetUserByEmailUseCase {

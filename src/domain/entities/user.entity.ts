@@ -100,6 +100,7 @@ export class User {
   }
 
   private static validatePassword(password: string) {
+    console.log("Password", password)
     if (!password?.trim().length) {
       throw new UserDomainError("Password is required")
     }

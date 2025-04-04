@@ -1,9 +1,10 @@
 import "reflect-metadata"
-import { PostRepository } from "../../../ports/postRepository"
-import { CreatePostInput, CreatePostUseCase } from "../createPostUseCase"
+import { CreatePostUseCase } from "../createPostUseCase"
 import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
 import { PostDomainError } from "../../../../domain/entities/post.entity"
 import { AppError } from "../../../../utils/fixtures/errors/AppError"
+import { PostRepository } from "../../../../domain/repositories/postRepository"
+import { CreatePostInput } from "../../../dtos/post.dto"
 
 // Mock the repositories
 const mockPostRepository: jest.Mocked<PostRepository> = {
