@@ -1,13 +1,18 @@
-import { injectable } from "tsyringe"
+import { inject, injectable } from "tsyringe"
 import { User } from "../../../domain/entities/user.entity"
 import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
 import { UserRepository } from "../../../domain/repositories/userRepository"
 import { UpdateUserInput } from "../../dtos/user.dto"
-
+import { IPasswordHasher } from "../../contracts/password-hasher.interface"
 @injectable()
 export class UpdateUserUseCase {
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    @inject("UserRepository")
+    private userRepository: UserRepository,
+    @inject("IPasswordHasher")
+    private passwordHasher: IPasswordHasher
+  ) {}
 
   async execute(input: UpdateUserInput): Promise<User> {
     const user = await this.userRepository.findById(input.id)
@@ -19,7 +24,9 @@ export class UpdateUserUseCase {
     user.updateDetails({
       name: input.name ?? user.name,
       email: input.email ?? user.email,
-      password: input.password ?? user.password,
+      password: input.password
+        ? await this.passwordHasher.hash(input?.password)
+        : user.password,
       role: input.role ?? user.role,
     })
 

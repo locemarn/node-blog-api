@@ -6,6 +6,7 @@ import { NotFoundError } from "../../../../utils/fixtures/errors/NotFoundError"
 import { AppError } from "../../../../utils/fixtures/errors/AppError"
 import { UserRepository } from "../../../../domain/repositories/userRepository"
 import { UpdateUserInput } from "../../../dtos/user.dto"
+import { IPasswordHasher } from "../../../contracts/password-hasher.interface"
 
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),
@@ -25,9 +26,16 @@ const validUpdatedUserInput: UpdateUserInput = {
 
 describe("UpdateUserUseCase", () => {
   let updateUserUseCase: UpdateUserUseCase
-
+  let mockPasswordHasher: jest.Mocked<IPasswordHasher>
   beforeEach(() => {
-    updateUserUseCase = new UpdateUserUseCase(mockUserRepository)
+    mockPasswordHasher = {
+      hash: jest.fn(),
+      compare: jest.fn(),
+    }
+    updateUserUseCase = new UpdateUserUseCase(
+      mockUserRepository,
+      mockPasswordHasher
+    )
   })
 
   it("should update a user successfully", async () => {
@@ -37,6 +45,8 @@ describe("UpdateUserUseCase", () => {
       password: "password",
       role: UserRole.ADMIN,
     })
+
+    mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
 
     mockUserRepository.findById.mockResolvedValue(user)
 
@@ -94,6 +104,7 @@ describe("UpdateUserUseCase", () => {
       role: UserRole.ADMIN,
     })
 
+    mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
     mockUserRepository.findById.mockResolvedValue(user)
 
     const updatedUser = await updateUserUseCase.execute({
@@ -101,7 +112,7 @@ describe("UpdateUserUseCase", () => {
       password: "updatedPassword",
     })
 
-    expect(updatedUser.password).toBe("updatedPassword")
+    expect(updatedUser.password).toBe("hashedPassword")
   })
 
   it("should throw a NotFoundError if the user is not found", async () => {
@@ -133,6 +144,7 @@ describe("UpdateUserUseCase", () => {
       role: UserRole.ADMIN,
     })
 
+    mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
     mockUserRepository.findById.mockResolvedValue(user)
     mockUserRepository.update.mockRejectedValue(
       new Error("Failed to update user")
