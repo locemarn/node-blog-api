@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import "reflect-metadata"
 import { DeleteUserUseCase } from "../deleteUserUseCase"
-import { User } from "../../../../domain/entities/user.entity"
-import { AppError } from "../../../../utils/fixtures/errors/AppError"
+import { User, Role } from "../../../../domain/entities/user.entity"
 import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
 import { UserRepository } from "../../../../domain/repositories/userRepository"
+import { AppError } from "../../../../utils/fixtures/errors/AppError"
 
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),
@@ -26,7 +26,7 @@ describe("DeleteUserUseCase", () => {
       username: "John Doe",
       email: "john.doe@example.com",
       password: "password",
-      role: "USER",
+      role: Role.USER,
     })
 
     mockUserRepository.findById.mockResolvedValue(user)

@@ -5,7 +5,7 @@ RUN apt-get update -y \
 
 WORKDIR /usr/src/app
 
-COPY package.json package-lock.json ./
+COPY packageon package-lockon ./
 
 COPY . .
 

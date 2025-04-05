@@ -3,7 +3,7 @@ import { User } from "../../../domain/entities/user.entity"
 import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
 import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
-import { UserRepository } from "../../../domain/repositories/userRepository"
+import type { UserRepository } from "../../../domain/repositories/userRepository"
 import { GetUserByEmailInput } from "../../dtos/user.dto"
 
 @injectable()

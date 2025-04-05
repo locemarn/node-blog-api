@@ -1,9 +1,9 @@
 import { injectable } from "tsyringe"
 import { User } from "../../../domain/entities/user.entity"
+import type { UserRepository } from "../../../domain/repositories/userRepository"
+import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
 import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
-import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
-import { UserRepository } from "../../../domain/repositories/userRepository"
 
 @injectable()
 export class GetUserByIdUseCase {
@@ -29,7 +29,10 @@ export class GetUserByIdUseCase {
       }
       return user
     } catch (error) {
-      throw new AppError("Failed to get user", 500, error)
+      if (error instanceof Error) {
+        throw new AppError("Failed to get user", 500, error)
+      }
+      throw new AppError("Failed to get user", 500, new Error("Unknown error")) // Handle non-Error cases
     }
   }
 }

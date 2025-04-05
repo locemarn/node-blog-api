@@ -1,70 +1,76 @@
 import { injectable } from "tsyringe"
 import { inject } from "tsyringe"
 import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
-import { User } from "../../../domain/entities/user.entity"
+import { Role, User } from "../../../domain/entities/user.entity"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
-import { UserRepository } from "../../../domain/repositories/userRepository"
+import type { UserRepository } from "../../../domain/repositories/userRepository"
 import { CreateUserInput } from "../../dtos/user.dto"
-import { IPasswordHasher } from "../../contracts/password-hasher.interface"
-import { Role } from "@prisma/client"
-import { BcryptPasswordHasher } from "../../../infrastructure/cryptography/bcrypt-password-hasher"
+import { IPasswordHasher } from "../../../application/contracts/password-hasher.interface"
 
 @injectable()
 export class CreateUserUseCase {
-  private _passwordHasher: IPasswordHasher
   constructor(
     @inject("UserRepository")
-    private userRepository: UserRepository
-  ) {
-    this._passwordHasher = new BcryptPasswordHasher()
-  }
+    private userRepository: UserRepository,
+    @inject("PasswordHasher")
+    private readonly passwordHasher: IPasswordHasher
+  ) {}
 
   /**
    * Executes the user creation logic.
-   * @param input - The data required to create the user.
-   * @returns A Promise resolving to the newly created User entity.
-   * @throws {ValidationError} if input data is invalid (e.g., empty name/email/password).
-   * @throws {AppError} for other specific application or persistence errors.
+   * @param {CreateUserInput} input - The data required to create the user. Contains username, email, password, and optional role.
+   * @returns {Promise<User>} A Promise resolving to the newly created User entity.
+   * @throws {ValidationError} If input data is invalid (e.g., empty fields, invalid role, email already exists).
+   * @throws {AppError} For unexpected errors during the process.
    */
-  async execute(input: CreateUserInput): Promise<User> {
-    if (!input.username?.trim()) {
-      throw new ValidationError("Username is required")
-    }
+  async execute({
+    username,
+    email,
+    password,
+    role,
+  }: CreateUserInput): Promise<User> {
+    const trimmedUsername = username?.trim()
+    if (!trimmedUsername) throw new ValidationError("Username is required")
 
-    if (!input.email?.trim()) {
-      throw new ValidationError("Email is required")
-    }
+    const trimmedEmail = email?.trim()
+    if (!trimmedEmail) throw new ValidationError("Email is required")
 
-    if (!input.password?.trim()) {
-      throw new ValidationError("Password is required")
+    const trimmedPassword = password?.trim()
+    if (!trimmedPassword) throw new ValidationError("Password is required")
+
+    const targetRole = (role ?? Role.USER) as unknown as Role
+    if (!Object.values(Role).includes(targetRole)) {
+      throw new ValidationError(`Invalid user role specified: ${role}`)
     }
 
     try {
       // Check if user already exists
-      const existingUser = await this.userRepository.findByEmail(input.email)
-      if (existingUser) {
-        throw new ValidationError("User already exists")
-      }
+      const existingUser = await this.userRepository.findByEmail(email)
+      if (existingUser)
+        throw new ValidationError("User with this email already exists")
 
-      const hashedPassword = await this._passwordHasher.hash(input.password)
-
-      const validRoles = [Role.ADMIN, Role.USER]
-      if (input.role && !validRoles.includes(input.role)) {
-        throw new ValidationError("Invalid user role")
-      }
+      const hashedPassword = await this.passwordHasher.hash(trimmedPassword)
 
       const userEntity = User.create({
-        username: input.username,
-        email: input.email,
+        username: trimmedUsername,
+        email: trimmedEmail,
         password: hashedPassword,
-        role: input.role ?? Role.USER,
+        role: targetRole,
       })
+
       const newUser = await this.userRepository.save(userEntity)
       return newUser
     } catch (error) {
-      const err = error as Error
-      // console.error("error ---->", err.message)
-      throw new AppError(err.message, 500, error)
+      if (error instanceof ValidationError || error instanceof AppError) {
+        // Re-throw known application-specific errors directly
+        throw error
+      }
+      // console.error("Unexpected error during user creation:", error)
+      throw new AppError(
+        "An unexpected error occurred while creating the user.",
+        500, // Internal Server Error status code
+        error instanceof Error ? error : undefined // Include original error as cause
+      )
     }
   }
 }

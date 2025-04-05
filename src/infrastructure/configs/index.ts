@@ -1,5 +1,5 @@
-import constants from './constants'
-import dotenv from 'dotenv'
+import constants from "./constants.js"
+import dotenv from "dotenv"
 
 dotenv.config()
 
@@ -13,8 +13,8 @@ const config = {
     port: process.env.APP_PORT ?? 8000,
   },
   route: {
-    prefix: '/api/v1',
-    graphqlPrefix: '/api/v1/graphql',
+    prefix: "/api/v1",
+    graphqlPrefix: "/api/v1/graphql",
   },
   db: {
     host: process.env.DB_HOST,
@@ -25,7 +25,7 @@ const config = {
     db_url: process.env.DATABASE_URL,
   },
   jwt: {
-    secret: process.env.JWT_PASS ?? 'secret-key',
+    secret: process.env.JWT_PASS ?? "secret-key",
   },
   log: {
     dir: process.env.LOG_DIR ?? `./logs`,

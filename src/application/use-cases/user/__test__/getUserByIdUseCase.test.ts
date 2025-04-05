@@ -1,10 +1,10 @@
 import "reflect-metadata"
-import { GetUserByIdUseCase } from "../getUserByIdUseCase"
-import { User } from "../../../../domain/entities/user.entity"
+import { Role, User } from "../../../../domain/entities/user.entity"
 import { AppError } from "../../../../utils/fixtures/errors/AppError"
 import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
 import { UserRepository } from "../../../../domain/repositories/userRepository"
 import { GetUserByIdInput } from "../../../dtos/user.dto"
+import { GetUserByIdUseCase } from "../getUserByIdUseCase"
 
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),
@@ -30,7 +30,7 @@ describe("getUserByIdUseCase", () => {
       username: "John Doe",
       email: "john.doe@example.com",
       password: "password",
-      role: "USER",
+      role: Role.USER,
     })
 
     mockUserRepository.findById.mockResolvedValue(user)

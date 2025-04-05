@@ -1,10 +1,9 @@
 import { injectable } from "tsyringe"
+import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
+import type { UserRepository } from "../../../domain/repositories/userRepository"
+import { DeleteUserInput } from "../../../application/dtos/user.dto"
 import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
-import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
-import { UserRepository } from "../../../domain/repositories/userRepository"
-import { DeleteUserInput } from "../../dtos/user.dto"
-
 @injectable()
 export class DeleteUserUseCase {
   constructor(private userRepository: UserRepository) {}
@@ -17,7 +16,7 @@ export class DeleteUserUseCase {
    * @throws {AppError} for other specific application or persistence errors.
    */
   async execute(input: DeleteUserInput): Promise<void> {
-    if (!input?.id) {
+    if (!input || !input.id) {
       throw new ValidationError("User ID is required")
     }
 

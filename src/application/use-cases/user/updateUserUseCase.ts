@@ -1,11 +1,11 @@
 import { inject, injectable } from "tsyringe"
-import { User } from "../../../domain/entities/user.entity"
-import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError"
 import { AppError } from "../../../utils/fixtures/errors/AppError"
-import { UserRepository } from "../../../domain/repositories/userRepository"
 import { UpdateUserInput } from "../../dtos/user.dto"
 import { IPasswordHasher } from "../../contracts/password-hasher.interface"
 import { BcryptPasswordHasher } from "../../../infrastructure/cryptography/bcrypt-password-hasher"
+import { Role, User } from "../../../domain/entities/user.entity"
+import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError"
+import type { UserRepository } from "../../../domain/repositories/userRepository"
 @injectable()
 export class UpdateUserUseCase {
   private _passwordHasher: IPasswordHasher
@@ -35,7 +35,7 @@ export class UpdateUserUseCase {
     }
 
     if (input.role) {
-      user.updateRole(input.role)
+      user.updateRole(input.role as Role)
     }
 
     try {

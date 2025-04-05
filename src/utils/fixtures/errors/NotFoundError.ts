@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { AppError } from "./AppError"
-
 /**
  * Represents an error when a requested resource could not be found.
  * Typically maps to an HTTP 404 Not Found status.

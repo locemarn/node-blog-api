@@ -1,5 +1,5 @@
 import "reflect-metadata"
-import { User } from "../../../../domain/entities/user.entity"
+import { Role, User } from "../../../../domain/entities/user.entity"
 import { UpdateUserUseCase } from "../updateUserUseCase"
 import { NotFoundError } from "../../../../utils/fixtures/errors/NotFoundError"
 import { AppError } from "../../../../utils/fixtures/errors/AppError"
@@ -39,7 +39,7 @@ describe("UpdateUserUseCase", () => {
       username: "John Doe",
       email: "john.doe@example.com",
       password: "password",
-      role: "USER",
+      role: Role.USER,
     })
 
     mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
@@ -68,7 +68,7 @@ describe("UpdateUserUseCase", () => {
       username: "John Doe",
       email: "john.doe@example.com",
       password: "password",
-      role: "USER",
+      role: Role.USER,
     })
 
     mockUserRepository.findById.mockResolvedValue(user)
@@ -99,7 +99,7 @@ describe("UpdateUserUseCase", () => {
       username: "John Doe",
       email: "john.doe@example.com",
       password: "password",
-      role: "USER",
+      role: Role.USER,
     })
 
     mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
@@ -147,7 +147,7 @@ describe("UpdateUserUseCase", () => {
       username: "John Doe",
       email: "john.doe@example.com",
       password: "password",
-      role: "USER",
+      role: Role.USER,
     })
 
     mockPasswordHasher.hash.mockResolvedValue("hashedPassword")
