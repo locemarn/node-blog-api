@@ -4,6 +4,6 @@ build
 coverage
 *.log
 .env
-package-lock.json
+package-lockon
 yarn.lock
 pnpm-lock.yaml

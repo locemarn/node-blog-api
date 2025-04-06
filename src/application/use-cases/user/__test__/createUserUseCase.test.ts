@@ -1,157 +1,246 @@
 import "reflect-metadata"
-import { User } from "../../../../domain/entities/user.entity"
-import { UserRepository } from "../../../../domain/repositories/userRepository"
-import { CreateUserInput } from "../../../dtos/user.dto"
-import { CreateUserUseCase } from "../createUserUseCase"
-// import BcryptPasswordHasher from "../../../infrastructure/cryptography/bcrypt-password-hasher"
+import { UserRepository } from "../../../../domain/repositories/userRepository.js"
+import { IPasswordHasher } from "../../../contracts/password-hasher.interface.js"
+import { CreateUserInput } from "../../../dtos/user.dto.js"
+import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError.js"
+import { AppError } from "../../../../utils/fixtures/errors/AppError.js"
+import { Role } from "@prisma/client"
+import { User } from "../../../../domain/entities/user.entity.js"
+import { CreateUserUseCase } from "../createUserUseCase.js"
+import { jest } from "@jest/globals"
+let mockUserRepository: jest.Mocked<UserRepository>
+let mockPasswordHasher: jest.Mocked<IPasswordHasher>
+let createUserUseCase: CreateUserUseCase
 
-const mockHash = jest.fn()
-jest.mock(
-  "../../../../infrastructure/cryptography/bcrypt-password-hasher",
-  () => {
-    return {
-      BcryptPasswordHasher: jest.fn().mockImplementation(() => {
-        // The instance created by `new BcryptPasswordHasher()` inside the use case
-        // will have this shape.
-        return {
-          hash: mockHash, // Provide the mock function for the 'hash' method
-          compare: jest.fn(), // Add compare if it exists and might be called (though not in this use case)
-        }
-      }),
-    }
+// --- Test Setup ---
+beforeEach(() => {
+  // Create new mock functions for each test
+  mockUserRepository = {
+    findByEmail: jest.fn(),
+    findById: jest.fn(), // Add other methods as needed
+    save: jest.fn(),
+    update: jest.fn(),
+    deleteById: jest.fn(),
   }
-)
 
-const mockUserRepository: jest.Mocked<UserRepository> = {
-  findByEmail: jest.fn(),
-  save: jest.fn(),
-  findById: jest.fn(),
-  update: jest.fn(),
-  deleteById: jest.fn(),
-}
+  mockPasswordHasher = {
+    hash: jest.fn(),
+    compare: jest.fn(),
+  }
 
-const validInput: CreateUserInput = {
-  username: "Test User",
-  email: "test@example.com",
-  password: "password123",
-  role: "USER",
-}
+  // Manually instantiate the Use Case with the MOCKS
+  // We do NOT use tsyringe.resolve here for unit testing isolation
+  createUserUseCase = new CreateUserUseCase(
+    mockUserRepository,
+    mockPasswordHasher
+  )
 
-const hashedPassword = "hashed_password_from_mock"
+  // Mock the static User.create method - IMPORTANT for checking entity creation logic
+  // We spy on it to ensure it's called correctly, but let the original logic run
+  // unless we need to mock its internal behavior specifically.
+  jest.spyOn(User, "create")
+})
 
+// --- Clear Mocks After Each Test ---
+afterEach(() => {
+  jest.restoreAllMocks() // Restores original implementations (incl. User.create spy)
+  jest.clearAllMocks() // Clears call counts etc.
+})
+
+// --- Test Suite ---
 describe("CreateUserUseCase", () => {
-  let createUserUseCase: CreateUserUseCase
+  const validInput: CreateUserInput = {
+    username: "testUser", // Include spaces to test trimming
+    email: "test@example.com",
+    password: "password123",
+    role: "USER",
+  }
 
-  beforeEach(() => {
-    jest.clearAllMocks()
-    createUserUseCase = new CreateUserUseCase(mockUserRepository)
+  const createdUser = User.create({
+    username: "testUser",
+    email: "test@example.com",
+    password: "hashed_password",
+    role: Role.USER,
   })
 
-  // --- Test Cases ---
-  it("should create a new user", async () => {
+  it("should successfully create a new user with valid input and default role", async () => {
     // Arrange
-    const input = { ...validInput }
-    const expectedCreateUserId = 1
-    const now = new Date()
+    const expectedHashedPassword = "expectedHashedPassword"
+    const expectedUser = createdUser
 
-    mockUserRepository.findByEmail.mockResolvedValue(null) // User does not exist
-    mockHash.mockResolvedValue(hashedPassword) // Returns password hashed
-
-    mockUserRepository.save.mockImplementation((user: User) => {
-      return Promise.resolve({
-        username: user.username,
-        email: user.email,
-        password: user.password,
-        role: user.role,
-        id: expectedCreateUserId,
-        created_at: now,
-        updated_at: now,
-      } as User)
-    })
+    mockUserRepository.findByEmail.mockResolvedValue(null)
+    mockPasswordHasher.hash.mockResolvedValue(expectedHashedPassword)
+    mockUserRepository.save.mockResolvedValue({
+      id: createdUser.id,
+      username: createdUser.username,
+      email: createdUser.email,
+      password: expectedHashedPassword,
+      role: createdUser.role,
+      created_at: createdUser.created_at,
+      updated_at: createdUser.updated_at,
+    } as User)
 
     // Act
-    const sut = await createUserUseCase.execute(input)
+    const sut = await createUserUseCase.execute(validInput)
 
-    expect(sut).toBeDefined()
-    expect(sut.id).toBe(expectedCreateUserId)
-    expect(sut.username).toBe(input.username)
-    expect(sut.email).toBe(input.email)
-    expect(sut.role).toBe(input.role)
-    expect(sut.created_at).toBe(now)
-    expect(sut.updated_at).toBe(now)
-    expect(sut.password).toBe(hashedPassword)
-    expect(mockHash).toHaveBeenCalledWith(input.password)
-  })
-
-  it("should create an user if 'USER' role as default, if role is not provider", async () => {
-    // Arrange
-    const input = { ...validInput, role: null } as unknown as CreateUserInput
-
-    // Act
-    const sut = await createUserUseCase.execute(input)
-
-    // Assert
-    expect(sut).toBeDefined()
-    expect(sut.role).toBe("USER")
-  })
-
-  it("should throw an error if the user already exists", async () => {
-    // Arrange
-    const input = { ...validInput }
-    const existingUser = { ...validInput, id: 1 } as User
-    mockUserRepository.findByEmail.mockResolvedValue(existingUser)
-
-    // Act & Assert
-    await expect(createUserUseCase.execute(input)).rejects.toThrow(
-      "User already exists"
+    expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
+      validInput.email
     )
-  })
-
-  it("should throw an error if the user is not valid", async () => {
-    // Arrange
-    const input = { ...validInput, username: "" }
-
-    // Act & Assert
-    await expect(createUserUseCase.execute(input)).rejects.toThrow(
-      "Username is required"
+    expect(mockPasswordHasher.hash).toHaveBeenCalledWith(validInput.password)
+    expect(User.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        role: Role.USER,
+      })
     )
+    expect(sut.role).toEqual(Role.USER)
+    expect(sut.id).toBe(createdUser.id)
   })
 
-  it("should throw an error if the email is not valid", async () => {
+  // --- Validation Error Tests ---
+
+  test.each([
+    [{ ...validInput, username: "" }, "Username is required"],
+    [{ ...validInput, username: "  " }, "Username is required"],
+    [{ ...validInput, email: "" }, "Email is required"],
+    [{ ...validInput, email: "  " }, "Email is required"],
+    [{ ...validInput, password: "" }, "Password is required"],
+    [{ ...validInput, password: "  " }, "Password is required"],
+  ])(
+    "should throw ValidationError if required field '%s' is missing or empty",
+    async (invalidInput, expectedErrorMsg) => {
+      // Arrange - No mock setup needed as validation fails early
+
+      // Act & Assert
+      await expect(
+        createUserUseCase.execute(invalidInput as CreateUserInput)
+      ).rejects.toThrow(ValidationError)
+      await expect(
+        createUserUseCase.execute(invalidInput as CreateUserInput)
+      ).rejects.toThrow(expectedErrorMsg)
+
+      expect(mockUserRepository.findByEmail).not.toHaveBeenCalled()
+      expect(mockPasswordHasher.hash).not.toHaveBeenCalled()
+      expect(mockUserRepository.save).not.toHaveBeenCalled()
+    }
+  )
+
+  it("should throw ValidationError if the provided role is invalid", async () => {
     // Arrange
-    const input = { ...validInput, email: "" }
+    const invalidInput = {
+      ...validInput,
+      role: "INVALID_ROLE" as any, // Force an invalid role type
+    }
 
     // Act & Assert
-    await expect(createUserUseCase.execute(input)).rejects.toThrow(
-      "Email is required"
+    await expect(createUserUseCase.execute(invalidInput)).rejects.toThrow(
+      ValidationError
     )
-  })
-
-  it("should throw an error if the password is not valid", async () => {
-    // Arrange
-    const input = { ...validInput, password: "" }
-
-    // Act & Assert
-    await expect(createUserUseCase.execute(input)).rejects.toThrow(
-      "Password is required"
+    await expect(createUserUseCase.execute(invalidInput)).rejects.toThrow(
+      `Invalid user role specified: ${invalidInput.role}`
     )
+
+    expect(mockUserRepository.findByEmail).not.toHaveBeenCalled() // Should fail before repo check
+    expect(mockPasswordHasher.hash).not.toHaveBeenCalled()
+    expect(mockUserRepository.save).not.toHaveBeenCalled()
   })
 
-  it("should throw an error if the role is not valid", async () => {
+  it("should throw ValidationError if user with the email already exists", async () => {
     // Arrange
-    const input = {
-      email: "valid_email@example.com",
-      password: "valid_password",
-      username: "valid_username",
-      role: "INVALID_ROLE",
-    } as unknown as CreateUserInput
-
-    mockUserRepository.findByEmail.mockResolvedValue(null) // User does not exist
-    mockHash.mockResolvedValue(hashedPassword)
+    mockUserRepository.findByEmail.mockResolvedValue(createdUser) // Simulate existing user
 
     // Act & Assert
-    await expect(createUserUseCase.execute(input)).rejects.toThrow(
-      "Invalid user role"
+    await expect(createUserUseCase.execute(validInput)).rejects.toThrow(
+      ValidationError
+    )
+    await expect(createUserUseCase.execute(validInput)).rejects.toThrow(
+      "User with this email already exists"
+    )
+
+    expect(mockUserRepository.findByEmail).toHaveBeenCalledTimes(2)
+    expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
+      "test@example.com"
+    )
+    expect(mockPasswordHasher.hash).not.toHaveBeenCalled()
+    expect(mockUserRepository.save).not.toHaveBeenCalled()
+  })
+
+  // --- Error Handling Tests ---
+
+  it("should throw AppError if password hashing fails", async () => {
+    // Arrange
+    const hashingError = new Error("Hashing failed")
+    mockUserRepository.findByEmail.mockResolvedValue(null) // User not found
+    mockPasswordHasher.hash.mockRejectedValue(hashingError) // Simulate hashing error
+
+    // Act & Assert
+    await expect(createUserUseCase.execute(validInput)).rejects.toThrow(
+      AppError
+    )
+    await expect(createUserUseCase.execute(validInput)).rejects.toThrow(
+      "An unexpected error occurred while creating the user."
+    )
+
+    expect(mockUserRepository.findByEmail).toHaveBeenCalledTimes(2)
+    expect(mockPasswordHasher.hash).toHaveBeenCalledTimes(2)
+    expect(mockUserRepository.save).not.toHaveBeenCalled()
+  })
+
+  it("should throw AppError if repository findByEmail fails", async () => {
+    // Arrange
+    const repoError = new Error("Database connection error")
+    mockUserRepository.findByEmail.mockRejectedValue(repoError) // Simulate findByEmail error
+
+    // Act & Assert
+    await expect(createUserUseCase.execute(validInput)).rejects.toThrow(
+      AppError
+    )
+    await expect(createUserUseCase.execute(validInput)).rejects.toThrow(
+      "An unexpected error occurred while creating the user."
+    )
+
+    expect(mockUserRepository.findByEmail).toHaveBeenCalledTimes(2)
+    expect(mockPasswordHasher.hash).not.toHaveBeenCalled()
+    expect(mockUserRepository.save).not.toHaveBeenCalled()
+  })
+
+  it("should throw AppError if repository save fails", async () => {
+    // Arrange
+    const repoError = new Error("Failed to save user")
+    mockUserRepository.findByEmail.mockResolvedValue(null)
+    mockPasswordHasher.hash.mockResolvedValue("hashed_password")
+    mockUserRepository.save.mockRejectedValue(repoError) // Simulate save error
+
+    // Act & Assert
+    await expect(createUserUseCase.execute(validInput)).rejects.toThrow(
+      AppError
+    )
+    await expect(createUserUseCase.execute(validInput)).rejects.toThrow(
+      "An unexpected error occurred while creating the user."
+    )
+
+    expect(mockUserRepository.findByEmail).toHaveBeenCalledTimes(2)
+    expect(mockPasswordHasher.hash).toHaveBeenCalledTimes(2)
+    expect(User.create).toHaveBeenCalledTimes(2)
+    expect(mockUserRepository.save).toHaveBeenCalledTimes(2)
+  })
+
+  it("should re-throw AppError if caught during execution", async () => {
+    // Arrange
+    const specificAppError = new AppError("Specific DB issue", 409)
+    mockUserRepository.findByEmail.mockRejectedValue(specificAppError)
+
+    // Act & Assert
+    // We expect the *original* AppError to be thrown, not the generic one
+    await expect(createUserUseCase.execute(validInput)).rejects.toThrow(
+      AppError
+    )
+    await expect(createUserUseCase.execute(validInput)).rejects.toThrow(
+      specificAppError.message
+    )
+    // Optionally check the status code if needed:
+    await expect(createUserUseCase.execute(validInput)).rejects.toHaveProperty(
+      "statusCode",
+      409
     )
   })
 })

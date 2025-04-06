@@ -1,11 +1,12 @@
 import "reflect-metadata"
-import { GetUserByEmailUseCase } from "../getUserByEmailUseCase"
-import { User } from "../../../../domain/entities/user.entity"
-import { AppError } from "../../../../utils/fixtures/errors/AppError"
-import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
-import { UserRepository } from "../../../../domain/repositories/userRepository"
-import { GetUserByEmailInput } from "../../../dtos/user.dto"
-
+import { UserRepository } from "../../../../domain/repositories/userRepository.js"
+import { GetUserByEmailInput } from "../../../dtos/user.dto.js"
+import { GetUserByEmailUseCase } from "../getUserByEmailUseCase.js"
+import { User } from "../../../../domain/entities/user.entity.js"
+import { AppError } from "../../../../utils/fixtures/errors/AppError.js"
+import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError.js"
+import { Role } from "@prisma/client"
+import { jest } from "@jest/globals"
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),
   findById: jest.fn(),
@@ -30,7 +31,7 @@ describe("getUserByEmailUseCase", () => {
       username: "John Doe",
       email: "john.doe@example.com",
       password: "password",
-      role: "USER",
+      role: Role.USER,
     })
 
     mockUserRepository.findByEmail.mockResolvedValue(user)

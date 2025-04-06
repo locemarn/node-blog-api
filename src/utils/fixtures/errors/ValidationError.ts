@@ -1,4 +1,5 @@
-import { AppError } from "./AppError"
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+import { AppError } from "./AppError.js"
 
 /**
  * Represents an error due to invalid input data provided by the client.

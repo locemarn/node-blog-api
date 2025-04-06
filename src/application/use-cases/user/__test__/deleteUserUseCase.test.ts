@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import "reflect-metadata"
-import { DeleteUserUseCase } from "../deleteUserUseCase"
-import { User } from "../../../../domain/entities/user.entity"
-import { AppError } from "../../../../utils/fixtures/errors/AppError"
-import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
-import { UserRepository } from "../../../../domain/repositories/userRepository"
-
+import { Role } from "@prisma/client"
+import { User } from "../../../../domain/entities/user.entity.js"
+import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError.js"
+import { UserRepository } from "../../../../domain/repositories/userRepository.js"
+import { AppError } from "../../../../utils/fixtures/errors/AppError.js"
+import { DeleteUserUseCase } from "../deleteUserUseCase.js"
+import { jest } from "@jest/globals"
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),
   findById: jest.fn(),
@@ -26,7 +27,7 @@ describe("DeleteUserUseCase", () => {
       username: "John Doe",
       email: "john.doe@example.com",
       password: "password",
-      role: "USER",
+      role: Role.USER,
     })
 
     mockUserRepository.findById.mockResolvedValue(user)

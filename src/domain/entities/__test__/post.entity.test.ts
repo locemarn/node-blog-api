@@ -1,4 +1,4 @@
-import { Clock, Post, PostDomainError, PostStatus } from "../post.entity"
+import { Clock, Post, PostDomainError, PostStatus } from "../post.entity.js"
 
 class MockClock implements Clock {
   private _currentTime: Date

@@ -1,4 +1,4 @@
-import { Post, PostStatus } from "../../domain/entities/post.entity"
+import { Post, PostStatus } from "../entities/post.entity.js"
 
 export interface FindAllOptions {
   page: number

@@ -1,4 +1,4 @@
-import { AppError } from "./AppError"
+import { AppError } from "./AppError.js"
 
 /**
  * Represents an error due to insufficient permissions to perform an action.

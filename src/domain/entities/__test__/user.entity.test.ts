@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Role } from "@prisma/client"
-import { User } from "../user.entity"
+import { User } from "../user.entity.js"
 
 describe("User Entity", () => {
   // --- Test Data ---
@@ -111,7 +110,7 @@ describe("User Entity", () => {
   describe("updateRole", () => {
     it("should update the user's role", () => {
       const user = User.create(validProps)
-      user.updateRole("ADMIN")
+      user.updateRole(Role.ADMIN)
       expect(user.role).toBe(Role.ADMIN)
     })
 

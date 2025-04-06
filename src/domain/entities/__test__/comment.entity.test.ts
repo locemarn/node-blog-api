@@ -1,4 +1,4 @@
-import { Comment, Clock, CommentDomainError } from "../comment.entity"
+import { Comment, Clock, CommentDomainError } from "../comment.entity.js"
 
 class MockClock implements Clock {
   private _currentTime: Date
