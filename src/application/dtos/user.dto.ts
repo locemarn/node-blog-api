@@ -7,6 +7,15 @@ export interface CreateUserInput {
   role: Role
 }
 
+export interface CreateUserOutput {
+  id: number
+  username: string
+  email: string
+  role: Role
+  created_at: Date
+  updated_at: Date
+}
+
 export interface UpdateUserInput {
   id: number
   username?: string

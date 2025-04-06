@@ -6,3 +6,8 @@ coverage/**
 ./coverage
 ./**/coverage
 ./**/coverage/**
+
+# Coverage report
+coverage/lcov-report/
+src/coverage/lcov-report/
+src/coverage
