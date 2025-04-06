@@ -1,10 +1,12 @@
 import "reflect-metadata"
-import { Role, User } from "../../../../domain/entities/user.entity"
-import { AppError } from "../../../../utils/fixtures/errors/AppError"
-import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
-import { UserRepository } from "../../../../domain/repositories/userRepository"
-import { GetUserByIdInput } from "../../../dtos/user.dto"
-import { GetUserByIdUseCase } from "../getUserByIdUseCase"
+import { AppError } from "../../../../utils/fixtures/errors/AppError.js"
+import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError.js"
+import { UserRepository } from "../../../../domain/repositories/userRepository.js"
+import { GetUserByIdInput } from "../../../dtos/user.dto.js"
+import { GetUserByIdUseCase } from "../getUserByIdUseCase.js"
+import { Role } from "@prisma/client"
+import { User } from "../../../../domain/entities/user.entity.js"
+import { jest } from "@jest/globals"
 
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),

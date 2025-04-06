@@ -1,7 +1,7 @@
 import { IResolvers } from "@graphql-tools/utils"
 import { DateResolver } from "graphql-scalars"
-import { PrismaUserRepository } from "#/infrastructure/database/prisma/repositories/PrismaUserRepository.js"
-import { GetUserByIdUseCase } from "#/application/use-cases/user/getUserByIdUseCase.js"
+import { PrismaUserRepository } from "../../../infrastructure/database/prisma/repositories/PrismaUserRepository.js"
+import { GetUserByIdUseCase } from "../../../application/use-cases/user/getUserByIdUseCase.js"
 
 const userRepository = new PrismaUserRepository()
 const getUserByIdUseCase = new GetUserByIdUseCase(userRepository)

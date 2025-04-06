@@ -1,4 +1,4 @@
-import type { IPasswordHasher } from "../../../contracts/password-hasher.interface"
+import type { IPasswordHasher } from "../../../contracts/password-hasher.interface.js"
 import { jest } from "@jest/globals"
 
 export const mockPasswordHasher: jest.Mocked<IPasswordHasher> = {

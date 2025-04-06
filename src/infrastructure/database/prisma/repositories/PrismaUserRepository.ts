@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client"
 import { getPrismaClient } from "../client.js"
-import { UserRepository } from "#/domain/repositories/userRepository.js"
-import { User } from "#/domain/entities/user.entity.js"
+import { UserRepository } from "../../../../domain/repositories/userRepository.js"
+import { User } from "../../../../domain/entities/user.entity.js"
 
 export class PrismaUserRepository implements UserRepository {
   private _prisma: PrismaClient
@@ -12,14 +12,14 @@ export class PrismaUserRepository implements UserRepository {
 
   async findById(id: number): Promise<User | null> {
     const user = await this._prisma.user.findUnique({
-      where: { id },
+      where: { id: +id },
     })
     if (!user) return null
+    console.log("user", user)
     return user as unknown as User
   }
 
   async save(user: User): Promise<User> {
-    console.log("user", user)
     try {
       const newUser = await this._prisma.user.create({
         data: {

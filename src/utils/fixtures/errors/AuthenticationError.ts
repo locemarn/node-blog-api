@@ -1,4 +1,4 @@
-import { AppError } from "#/utils/fixtures/errors/AppError.js"
+import { AppError } from "./AppError.js"
 
 /**
  * Represents an error when authentication is required but missing or invalid.

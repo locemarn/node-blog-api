@@ -1,4 +1,4 @@
-import { Category, CategoryDomainError } from "../category.entity"
+import { Category, CategoryDomainError } from "../category.entity.js"
 
 describe("Category Entity", () => {
   describe("create", () => {

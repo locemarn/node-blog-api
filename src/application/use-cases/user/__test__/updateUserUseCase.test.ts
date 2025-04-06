@@ -1,12 +1,13 @@
 import "reflect-metadata"
-import { Role, User } from "../../../../domain/entities/user.entity"
-import { UpdateUserUseCase } from "../updateUserUseCase"
-import { NotFoundError } from "../../../../utils/fixtures/errors/NotFoundError"
-import { AppError } from "../../../../utils/fixtures/errors/AppError"
-import { UserRepository } from "../../../../domain/repositories/userRepository"
-import { UpdateUserInput } from "../../../dtos/user.dto"
-import { IPasswordHasher } from "../../../contracts/password-hasher.interface"
-
+import { NotFoundError } from "../../../../utils/fixtures/errors/NotFoundError.js"
+import { AppError } from "../../../../utils/fixtures/errors/AppError.js"
+import { UserRepository } from "../../../../domain/repositories/userRepository.js"
+import { UpdateUserInput } from "../../../dtos/user.dto.js"
+import { IPasswordHasher } from "../../../contracts/password-hasher.interface.js"
+import { Role } from "@prisma/client"
+import { User } from "../../../../domain/entities/user.entity.js"
+import { UpdateUserUseCase } from "../updateUserUseCase.js"
+import { jest } from "@jest/globals"
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),
   findById: jest.fn(),

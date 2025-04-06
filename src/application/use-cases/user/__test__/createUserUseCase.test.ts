@@ -1,12 +1,13 @@
 import "reflect-metadata"
-import { Role, User } from "../../../../domain/entities/user.entity"
-import { UserRepository } from "../../../../domain/repositories/userRepository"
-import { IPasswordHasher } from "../../../contracts/password-hasher.interface"
-import { CreateUserInput } from "../../../dtos/user.dto"
-import { CreateUserUseCase } from "../createUserUseCase"
-import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError"
-import { AppError } from "../../../../utils/fixtures/errors/AppError"
-
+import { UserRepository } from "../../../../domain/repositories/userRepository.js"
+import { IPasswordHasher } from "../../../contracts/password-hasher.interface.js"
+import { CreateUserInput } from "../../../dtos/user.dto.js"
+import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError.js"
+import { AppError } from "../../../../utils/fixtures/errors/AppError.js"
+import { Role } from "@prisma/client"
+import { User } from "../../../../domain/entities/user.entity.js"
+import { CreateUserUseCase } from "../createUserUseCase.js"
+import { jest } from "@jest/globals"
 let mockUserRepository: jest.Mocked<UserRepository>
 let mockPasswordHasher: jest.Mocked<IPasswordHasher>
 let createUserUseCase: CreateUserUseCase
@@ -52,7 +53,7 @@ describe("CreateUserUseCase", () => {
     username: "testUser", // Include spaces to test trimming
     email: "test@example.com",
     password: "password123",
-    role: Role.USER,
+    role: "USER",
   }
 
   const createdUser = User.create({

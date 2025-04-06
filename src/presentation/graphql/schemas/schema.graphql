@@ -29,3 +29,18 @@ type Post {
   created_at: Date!
   updated_at: Date!
 }
+
+input CreateUserInput {
+  email: String!
+  username: String!
+  password: String!
+  role: String!
+}
+
+input UpdateUserInput {
+  id: ID!
+  email: String
+  username: String
+  password: String
+  role: String
+}

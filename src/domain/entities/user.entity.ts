@@ -1,9 +1,10 @@
+import { Role } from "@prisma/client"
 import { randomInt } from "node:crypto"
 
-export enum Role {
-  ADMIN = "ADMIN",
-  USER = "USER",
-}
+// export enum Role {
+//   ADMIN = "ADMIN",
+//   USER = "USER",
+// }
 
 // export class UserDomainError extends Error {
 //   constructor(message: string) {

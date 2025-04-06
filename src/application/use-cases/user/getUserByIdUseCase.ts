@@ -1,9 +1,9 @@
 import { injectable } from "tsyringe"
-import { User } from "../../../domain/entities/user.entity"
-import type { UserRepository } from "../../../domain/repositories/userRepository"
-import { ValidationError } from "../../../utils/fixtures/errors/ValidationError"
-import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError"
-import { AppError } from "../../../utils/fixtures/errors/AppError"
+import { User } from "../../../domain/entities/user.entity.js"
+import type { UserRepository } from "../../../domain/repositories/userRepository.js"
+import { ValidationError } from "../../../utils/fixtures/errors/ValidationError.js"
+import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError.js"
+import { AppError } from "../../../utils/fixtures/errors/AppError.js"
 
 @injectable()
 export class GetUserByIdUseCase {

@@ -3,11 +3,31 @@
  * https://jestjs.io/docs/configuration
  */
 
-import type { Config } from "jest"
+// Use ESM imports
+import { pathsToModuleNameMapper } from "ts-jest"
+import fs from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
 
-const config: Config = {
+// --- Get current directory in ESM ---
+const __filename = fileURLToPath(import.meta.url) // Should now be allowed in .mjs
+const __dirname = path.dirname(__filename)
+// --- ---
+
+// --- Read tsconfig.json using fs ---
+const tsconfigPath = path.resolve(__dirname, "./tsconfig.json")
+const tsconfigContent = fs.readFileSync(tsconfigPath, "utf-8")
+const { compilerOptions } = JSON.parse(tsconfigContent)
+// --- ---
+
+// Use JSDoc for type hints if needed, or just define the object
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+const config = {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
+
+  // A preset that is used as a base for Jest's configuration
+  preset: "ts-jest/presets/default-esm", // Use 'moduleResolution': 'node' specific preset if needed
 
   // Stop running tests after `n` failures
   // bail: 0,
@@ -74,19 +94,27 @@ const config: Config = {
   moduleDirectories: ["node_modules"],
 
   // An array of file extensions your modules use
-  // moduleFileExtensions: [
-  //   "js",
-  //   "mjs",
-  //   "cjs",
-  //   "jsx",
-  //   "ts",
-  //   "tsx",
-  //   "json",
-  //   "node"
-  // ],
+  moduleFileExtensions: [
+    "js",
+    "mjs",
+    "cjs",
+    "jsx",
+    "ts",
+    "tsx",
+    "json",
+    "node",
+  ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
+  moduleNameMapper: {
+    // --- Crucial for mapping .js imports back to .ts ---
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+
+    // --- Automatically generate mappers from tsconfig paths ---
+    ...pathsToModuleNameMapper(compilerOptions.paths || {}, {
+      prefix: "<rootDir>/",
+    }),
+  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
@@ -96,9 +124,6 @@ const config: Config = {
 
   // An enum that specifies notification mode. Requires { notify: true }
   // notifyMode: "failure-change",
-
-  // A preset that is used as a base for Jest's configuration
-  preset: "ts-jest",
 
   // Run tests from one or more projects
   // projects: undefined,
@@ -142,7 +167,7 @@ const config: Config = {
   // snapshotSerializers: [],
 
   // The test environment that will be used for testing
-  // testEnvironment: "jest-environment-node",
+  testEnvironment: "node",
 
   // Options that will be passed to the testEnvironment
   // testEnvironmentOptions: {},
