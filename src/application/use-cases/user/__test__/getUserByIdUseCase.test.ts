@@ -4,10 +4,9 @@ import { ValidationError } from "../../../../utils/fixtures/errors/ValidationErr
 import { UserRepository } from "../../../../domain/repositories/userRepository.js"
 import { GetUserByIdInput } from "../../../dtos/user.dto.js"
 import { GetUserByIdUseCase } from "../getUserByIdUseCase.js"
-import { Role } from "@prisma/client"
 import { User } from "../../../../domain/entities/user.entity.js"
 import { jest } from "@jest/globals"
-
+import { Role } from "../../../../domain/entities/user.entity.js"
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),
   findById: jest.fn(),

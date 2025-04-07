@@ -2,12 +2,12 @@ import "reflect-metadata"
 import { UserRepository } from "../../../../domain/repositories/userRepository.js"
 import { IPasswordHasher } from "../../../contracts/password-hasher.interface.js"
 import { CreateUserInput } from "../../../dtos/user.dto.js"
-import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError.js"
 import { AppError } from "../../../../utils/fixtures/errors/AppError.js"
-import { Role } from "@prisma/client"
 import { User } from "../../../../domain/entities/user.entity.js"
 import { CreateUserUseCase } from "../createUserUseCase.js"
 import { jest } from "@jest/globals"
+import { Role } from "../../../../domain/entities/user.entity.js"
+import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError.js"
 let mockUserRepository: jest.Mocked<UserRepository>
 let mockPasswordHasher: jest.Mocked<IPasswordHasher>
 let createUserUseCase: CreateUserUseCase
@@ -53,7 +53,7 @@ describe("CreateUserUseCase", () => {
     username: "testUser", // Include spaces to test trimming
     email: "test@example.com",
     password: "password123",
-    role: "USER",
+    role: Role.USER,
   }
 
   const createdUser = User.create({

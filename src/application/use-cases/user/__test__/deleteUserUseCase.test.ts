@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import "reflect-metadata"
-import { Role } from "@prisma/client"
 import { User } from "../../../../domain/entities/user.entity.js"
 import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError.js"
 import { UserRepository } from "../../../../domain/repositories/userRepository.js"
 import { AppError } from "../../../../utils/fixtures/errors/AppError.js"
 import { DeleteUserUseCase } from "../deleteUserUseCase.js"
 import { jest } from "@jest/globals"
+import { Role } from "../../../../domain/entities/user.entity.js"
+
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),
   findById: jest.fn(),

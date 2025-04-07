@@ -4,10 +4,10 @@ import { AppError } from "../../../../utils/fixtures/errors/AppError.js"
 import { UserRepository } from "../../../../domain/repositories/userRepository.js"
 import { UpdateUserInput } from "../../../dtos/user.dto.js"
 import { IPasswordHasher } from "../../../contracts/password-hasher.interface.js"
-import { Role } from "@prisma/client"
 import { User } from "../../../../domain/entities/user.entity.js"
 import { UpdateUserUseCase } from "../updateUserUseCase.js"
 import { jest } from "@jest/globals"
+import { Role } from "../../../../domain/entities/user.entity.js"
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),
   findById: jest.fn(),

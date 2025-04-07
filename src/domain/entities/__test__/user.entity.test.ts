@@ -1,6 +1,5 @@
-import { Role } from "@prisma/client"
 import { User } from "../user.entity.js"
-
+import { Role } from "../user.entity.js"
 describe("User Entity", () => {
   // --- Test Data ---
   const validProps = {

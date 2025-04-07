@@ -2,12 +2,11 @@ import { injectable } from "tsyringe"
 import { inject } from "tsyringe"
 import { ValidationError } from "../../../utils/fixtures/errors/ValidationError.js"
 import { User } from "../../../domain/entities/user.entity.js"
-import { Role } from "@prisma/client"
 import { AppError } from "../../../utils/fixtures/errors/AppError.js"
 import type { UserRepository } from "../../../domain/repositories/userRepository.js"
 import { CreateUserInput } from "../../dtos/user.dto.js"
 import { IPasswordHasher } from "../../../application/contracts/password-hasher.interface.js"
-
+import { Role } from "../../../domain/entities/user.entity.js"
 @injectable()
 export class CreateUserUseCase {
   constructor(

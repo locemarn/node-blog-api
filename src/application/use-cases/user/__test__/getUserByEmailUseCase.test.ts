@@ -5,8 +5,8 @@ import { GetUserByEmailUseCase } from "../getUserByEmailUseCase.js"
 import { User } from "../../../../domain/entities/user.entity.js"
 import { AppError } from "../../../../utils/fixtures/errors/AppError.js"
 import { ValidationError } from "../../../../utils/fixtures/errors/ValidationError.js"
-import { Role } from "@prisma/client"
 import { jest } from "@jest/globals"
+import { Role } from "../../../../domain/entities/user.entity.js"
 const mockUserRepository: jest.Mocked<UserRepository> = {
   save: jest.fn(),
   findById: jest.fn(),

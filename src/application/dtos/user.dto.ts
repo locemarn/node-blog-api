@@ -1,5 +1,4 @@
-import { Role } from "@prisma/client"
-
+import { Role } from "#/domain/entities/user.entity.js"
 export interface CreateUserInput {
   username: string
   email: string
