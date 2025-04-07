@@ -6,7 +6,7 @@ import { BcryptPasswordHasher } from "../../../infrastructure/cryptography/bcryp
 import { User } from "../../../domain/entities/user.entity.js"
 import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError.js"
 import type { UserRepository } from "../../../domain/repositories/userRepository.js"
-import { Role } from "@prisma/client"
+import { Role } from "../../../domain/entities/user.entity.js"
 @injectable()
 export class UpdateUserUseCase {
   private _passwordHasher: IPasswordHasher
