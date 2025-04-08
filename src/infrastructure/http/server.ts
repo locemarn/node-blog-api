@@ -104,7 +104,7 @@ async function startServer() {
   })
 
   // Iniciar o servidor HTTP
-  const PORT = process.env.PORT || 4000
+  const PORT = process.env.PORT || 8000
   httpServer.listen(PORT, () => {
     console.info(
       `🚀 Server ready at http://localhost:${PORT}${graphqlPrefixRoute}`
