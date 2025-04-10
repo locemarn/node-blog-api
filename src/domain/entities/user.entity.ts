@@ -105,6 +105,15 @@ export class User {
   }
 
   /**
+   * Restores a User instance from existing data.
+   * @param props The properties of the user to restore.
+   * @returns A new User instance with the provided properties.
+   */
+  public static restore(props: UserProps): User {
+    return new User(props)
+  }
+
+  /**
    * Changes the user's password hash.
    * The caller is responsible for generating the new hash *before* calling this method.
    * @param newPasswordHash The new, already hashed password. Must not be empty.
@@ -112,7 +121,6 @@ export class User {
   public changePassword(newPasswordHash: string): void {
     User.validatePassword(newPasswordHash) // Validate the new hash format/presence
     this._password = newPasswordHash
-    // console.log("this._password", this._password)
     this.touch() // Update the updatedAt timestamp
   }
 

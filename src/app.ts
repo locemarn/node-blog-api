@@ -9,4 +9,4 @@ const app = async () => {
   }
 }
 
-app()
+await app()

@@ -18,20 +18,18 @@ export class UpdateUserUseCase {
   }
 
   async execute(input: UpdateUserInput): Promise<User> {
-    const user = await this.userRepository.findById(input.id)
+    const userId = +input.id
+    if (!userId) throw new AppError("User ID is required", 400)
+    const foundUser = await this.userRepository.findById(input.id)
+    if (!foundUser) throw new NotFoundError("User not found")
 
-    if (!user) {
-      throw new NotFoundError("User not found")
-    }
-
+    const user = User.restore(foundUser)
     if (input.username) {
-      user.updateProfile(input.username)
+      const res = user.updateProfile(input.username)
     }
 
     if (input.password) {
-      // console.log("input.password", input.password)
       const hashedPassword = await this._passwordHasher.hash(input.password)
-      // console.log("hashedPassword", hashedPassword)
       user.changePassword(hashedPassword)
     }
 
@@ -41,7 +39,6 @@ export class UpdateUserUseCase {
 
     try {
       const updatedUser = await this.userRepository.update(user)
-      // console.log("updatedUser", updatedUser)
       return updatedUser
     } catch (error) {
       throw new AppError("Failed to update user", 500, error)

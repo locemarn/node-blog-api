@@ -17,18 +17,11 @@ export class GetUserByEmailUseCase {
    * @throws {NotFoundError} if the user is not found.
    * @throws {AppError} for other specific application or persistence errors.
    */
-  async execute(input: GetUserByEmailInput): Promise<User> {
-    if (!input?.email) {
-      throw new ValidationError("Email is required")
-    }
-
+  async execute(email: string): Promise<User> {
+    if (!email) throw new ValidationError("Email is required")
     try {
-      const user = await this.userRepository.findByEmail(input.email)
-
-      if (!user) {
-        throw new NotFoundError("User not found")
-      }
-
+      const user = await this.userRepository.findByEmail(email)
+      if (!user) throw new NotFoundError("User not found")
       return user
     } catch (error) {
       throw new AppError("Failed to get user", 500, error)

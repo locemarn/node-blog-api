@@ -4,11 +4,15 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import express, { NextFunction, Request, Response } from "express"
 import { readFileSync } from "fs"
 import http from "http"
-import { userResolvers } from "../../presentation/graphql/resolvers/userResolvers.js"
+import {
+  resolvers,
+  userResolver,
+} from "../../presentation/graphql/resolvers/userResolvers.js"
 import { GraphQLError, GraphQLFormattedError } from "graphql"
 import config from "../configs/index.js"
 import cors from "cors"
 import { expressMiddleware } from "@apollo/server/express4"
+import { buildSubgraphSchema } from "@apollo/subgraph"
 
 const isProduction = config.isProd()
 const graphqlPrefixRoute = config.route.graphqlPrefix
@@ -16,6 +20,11 @@ const graphqlPrefixRoute = config.route.graphqlPrefix
 async function startServer() {
   const app = express()
   const httpServer = http.createServer(app)
+
+  const url = new URL(
+    "../../presentation/graphql/resolvers/userResolvers.js",
+    import.meta.url
+  ).pathname // Replaced __dirname with import.meta.url
 
   const typeDefs = readFileSync(
     new URL(
@@ -28,7 +37,7 @@ async function startServer() {
   // Instanciar Apollo Server
   const server = new ApolloServer({
     typeDefs,
-    resolvers: [userResolvers],
+    resolvers,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     formatError: (
       formattedError: GraphQLFormattedError,
@@ -84,11 +93,21 @@ async function startServer() {
   // Aplicar Middlewares do Express
   app.use(cors()) // Configurar CORS adequadamente para produção
   app.use(express.json())
+  app.use(express.urlencoded({ extended: true }))
 
   app.use(
     `${graphqlPrefixRoute}`,
     cors<cors.CorsRequest>(),
-    expressMiddleware(server) as unknown as express.RequestHandler
+    expressMiddleware(server, {
+      context: async ({ req, res }) => {
+        // Aqui você pode adicionar o contexto para cada requisição
+        // Exemplo: Autenticação, autorização, etc.
+        // TODO: Implementar autenticação
+        console.log("req", req.body)
+        token: req.headers.authorization || "token"
+        return { req, res }
+      },
+    }) as unknown as express.RequestHandler
   )
 
   // Rota de Health Check (opcional, mas bom)
