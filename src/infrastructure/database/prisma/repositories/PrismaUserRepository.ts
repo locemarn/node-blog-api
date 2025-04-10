@@ -15,8 +15,7 @@ export class PrismaUserRepository implements UserRepository {
       where: { id: +id },
     })
     if (!user) return null
-    console.log("user", user)
-    return user as unknown as User
+    return user as User
   }
 
   async save(user: User): Promise<User> {

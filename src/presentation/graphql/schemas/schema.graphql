@@ -1,5 +1,10 @@
 scalar Date
 
+enum Role {
+  ADMIN
+  USER
+}
+
 type Query {
   getUserById(id: ID!): User!
   getUserByEmail(email: String!): User!
@@ -34,7 +39,7 @@ input CreateUserInput {
   email: String!
   username: String!
   password: String!
-  role: String!
+  role: Role!
 }
 
 input UpdateUserInput {
