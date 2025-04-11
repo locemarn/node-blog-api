@@ -31,7 +31,7 @@ export interface UserRepository {
    * @param id The ID of the user to delete.
    * @throws Error if deletion fails.
    */
-  deleteById(id: number): Promise<void>
+  deleteById(id: number): Promise<User>
 
   /**
    * Finds a User by their email address.

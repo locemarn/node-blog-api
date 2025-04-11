@@ -12,6 +12,9 @@ import { BcryptPasswordHasher } from "#/infrastructure/cryptography/bcrypt-passw
 import { DeleteUserUseCase } from "#/application/use-cases/user/deleteUserUseCase.js"
 import { UpdateUserUseCase } from "#/application/use-cases/user/updateUserUseCase.js"
 import { GetUserByEmailUseCase } from "#/application/use-cases/user/getUserByEmailUseCase.js"
+import { JwtTokenService } from "#/infrastructure/libs/jwt/jwtService.js"
+import config from "#/infrastructure/configs/index.js"
+import { RoleGuard } from "../guards/RoleGuard.js"
 
 const userRepository = new PrismaUserRepository()
 const getUserByIdUseCase = new GetUserByIdUseCase(userRepository)
@@ -20,26 +23,33 @@ const createUserUseCase = new CreateUserUseCase(userRepository, passwordHasher)
 const deleteUserUseCase = new DeleteUserUseCase(userRepository)
 const updateUserUseCase = new UpdateUserUseCase(userRepository)
 const getUserByEmailUseCase = new GetUserByEmailUseCase(userRepository)
+const {
+  jwt: { secret, expiresIn },
+} = config
+const jwtTokenService = new JwtTokenService(secret, +expiresIn)
+
+const adminOnly = new RoleGuard("ADMIN")
 
 export const userResolver: IResolvers = {
   Date: DateResolver,
 
   Query: {
-    getUserById: async (_, { id }: { id: number }) => {
+    getUserById: adminOnly.handle(async (_, { id }: { id: number }) => {
       const user = await getUserByIdUseCase.execute(id)
       return user
-    },
-    getUserByEmail: async (_, { email }: { email: string }) => {
-      const user = await getUserByEmailUseCase.execute(email)
-      return user
-    },
+    }),
+    getUserByEmail: adminOnly.handle(
+      async (_, { email }: { email: string }) => {
+        const user = await getUserByEmailUseCase.execute(email)
+        return user
+      }
+    ),
   },
   Mutation: {
     createUser: async (
       _,
       { input }: { input: CreateUserInput }
     ): Promise<CreateUserOutput> => {
-      console.log("input", input)
       try {
         const userDto = await createUserUseCase.execute({
           username: input.username,
@@ -47,7 +57,6 @@ export const userResolver: IResolvers = {
           password: input.password,
           role: input.role,
         })
-        console.log("userDto", userDto)
         return {
           id: userDto.id,
           username: userDto.username,
@@ -63,30 +72,43 @@ export const userResolver: IResolvers = {
         throw new Error(err.message || "Failed to create user")
       }
     },
-    deleteUser: async (_, { id }: { id: number }) => {
+    deleteUser: adminOnly.handle(async (_, { id }: { id: number }) => {
       try {
-        const deletedUser = await deleteUserUseCase.execute({ id })
+        const deletedUser = await deleteUserUseCase.execute({ id: +id })
         return deletedUser
       } catch (error) {
         const err = error as Error
         // console.error("Error deleting user:", error)
         throw new Error(err.message || "Failed to delete user")
       }
-    },
-    updateUser: async (__dirname, { input }: { input: UpdateUserInput }) => {
-      try {
-        const updatedUser = await updateUserUseCase.execute(input)
-        return updatedUser
-      } catch (error) {
-        const err = error as Error
-        // console.error("Error updating user:", error)
-        throw new Error(err.message || "Failed to update user")
+    }),
+    updateUser: adminOnly.handle(
+      async (__dirname, { input }: { input: UpdateUserInput }) => {
+        try {
+          const updatedUser = await updateUserUseCase.execute(input)
+          return updatedUser
+        } catch (error) {
+          const err = error as Error
+          // console.error("Error updating user:", error)
+          throw new Error(err.message || "Failed to update user")
+        }
       }
+    ),
+    login: async (
+      _,
+      { email, password }: { email: string; password: string }
+    ): Promise<{ token: string; user: CreateUserOutput }> => {
+      const user = await getUserByEmailUseCase.execute(email)
+      if (!user) throw new Error("User not found")
+
+      const isPasswordValid = await passwordHasher.compare(
+        password,
+        user.password
+      )
+      if (!isPasswordValid) throw new Error("Invalid password")
+
+      const token = await jwtTokenService.generateToken(user)
+      return { token, user }
     },
   },
-}
-
-export const resolvers = {
-  Query: { ...userResolver.Query },
-  Mutation: { ...userResolver.Mutation },
 }

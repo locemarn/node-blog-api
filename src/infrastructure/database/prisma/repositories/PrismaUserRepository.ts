@@ -56,11 +56,19 @@ export class PrismaUserRepository implements UserRepository {
     }
   }
 
-  async deleteById(id: number): Promise<void> {
+  async deleteById(id: number): Promise<User> {
     try {
-      await this._prisma.user.delete({
+      return (await this._prisma.user.delete({
         where: { id },
-      })
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          role: true,
+          created_at: true,
+          updated_at: true,
+        },
+      })) as User
     } catch (error) {
       console.error("prisma delete user error ---->", error)
       throw new Error("Failed to delete user")

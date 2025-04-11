@@ -26,6 +26,7 @@ const config = {
   },
   jwt: {
     secret: process.env.JWT_PASS ?? "secret-key",
+    expiresIn: process.env.JWT_EXPIRES_IN ?? "1h",
   },
   log: {
     dir: process.env.LOG_DIR ?? `./logs`,

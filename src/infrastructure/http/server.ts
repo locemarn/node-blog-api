@@ -4,18 +4,30 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import express, { NextFunction, Request, Response } from "express"
 import { readFileSync } from "fs"
 import http from "http"
-import {
-  resolvers,
-  userResolver,
-} from "../../presentation/graphql/resolvers/userResolvers.js"
+import { resolvers } from "../../presentation/graphql/resolvers/index.js"
 import { GraphQLError, GraphQLFormattedError } from "graphql"
 import config from "../configs/index.js"
 import cors from "cors"
 import { expressMiddleware } from "@apollo/server/express4"
-import { buildSubgraphSchema } from "@apollo/subgraph"
+import { JwtTokenService } from "../libs/jwt/jwtService.js"
+import { AuthMiddleware } from "#/presentation/middleware/authMiddleware.js"
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any // Replace 'any' with the appropriate type for 'user'
+    }
+  }
+}
+
+const {
+  jwt: { secret, expiresIn },
+} = config
 const isProduction = config.isProd()
 const graphqlPrefixRoute = config.route.graphqlPrefix
+
+const jwtTokenService = new JwtTokenService(secret, +expiresIn)
+const authMiddleware = new AuthMiddleware(jwtTokenService)
 
 async function startServer() {
   const app = express()
@@ -98,14 +110,16 @@ async function startServer() {
   app.use(
     `${graphqlPrefixRoute}`,
     cors<cors.CorsRequest>(),
+    authMiddleware.handle,
     expressMiddleware(server, {
       context: async ({ req, res }) => {
-        // Aqui você pode adicionar o contexto para cada requisição
-        // Exemplo: Autenticação, autorização, etc.
-        // TODO: Implementar autenticação
-        console.log("req", req.body)
-        token: req.headers.authorization || "token"
-        return { req, res }
+        return {
+          req,
+          res,
+          user: req.user,
+          token: req.headers.authorization,
+        }
+        // return { req, res, user, token }
       },
     }) as unknown as express.RequestHandler
   )

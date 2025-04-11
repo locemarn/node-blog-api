@@ -88,8 +88,6 @@ describe("UpdateUserUseCase", () => {
       username: "Jane Doe",
     })
 
-    console.log("updatedUser", updatedUser)
-
     expect(updatedUser.username).toBe("Jane Doe")
     expect(updatedUser.email).toBe(user.email)
     expect(updatedUser.role).toBe(user.role)

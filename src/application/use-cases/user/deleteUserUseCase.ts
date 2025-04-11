@@ -4,6 +4,7 @@ import type { UserRepository } from "../../../domain/repositories/userRepository
 import { DeleteUserInput } from "../../dtos/user.dto.js"
 import { NotFoundError } from "../../../utils/fixtures/errors/NotFoundError.js"
 import { AppError } from "../../../utils/fixtures/errors/AppError.js"
+import { User } from "#/domain/entities/user.entity.js"
 @injectable()
 export class DeleteUserUseCase {
   constructor(private userRepository: UserRepository) {}
@@ -15,19 +16,16 @@ export class DeleteUserUseCase {
    * @throws {NotFoundError} if the user is not found.
    * @throws {AppError} for other specific application or persistence errors.
    */
-  async execute(input: DeleteUserInput): Promise<void> {
+  async execute(input: DeleteUserInput): Promise<User | null> {
     if (!input || !input.id) {
       throw new ValidationError("User ID is required")
     }
 
     try {
       const user = await this.userRepository.findById(input.id)
+      if (!user) throw new NotFoundError("User not found")
 
-      if (!user) {
-        throw new NotFoundError("User not found")
-      }
-
-      await this.userRepository.deleteById(input.id)
+      return await this.userRepository.deleteById(input.id)
     } catch (error) {
       throw new AppError("Failed to delete user", 500, error)
     }

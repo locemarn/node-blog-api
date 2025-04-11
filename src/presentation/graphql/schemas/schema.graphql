@@ -14,6 +14,13 @@ type Mutation {
   createUser(input: CreateUserInput!): User!
   updateUser(input: UpdateUserInput!): User!
   deleteUser(id: ID!): User!
+  login(email: String!, password: String!): AuthPayload!
+  logout: AuthPayload!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
 }
 
 type User {
